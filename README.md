@@ -1,20 +1,3 @@
-# Welcome to Docker
+docker compose up -d : para levantar todos los servicios 
 
-This is a repo for new users getting started with Docker.
-
-You can try it out using the following command.
-```
-docker run -d -p 8088:80 --name welcome-to-docker docker/welcome-to-docker
-```
-And open `http://localhost:8088` in your browser.
-
-# Building
-
-Maintainers should see [MAINTAINERS.md](MAINTAINERS.md).
-
-Build and run:
-```
-docker build -t welcome-to-docker . 
-docker run -d -p 8088:3000 --name welcome-to-docker welcome-to-docker
-```
-Open `http://localhost:8088` in your browser.
+docker compose exec mi_base_de_datos mariadb -u root -proot -e "USE microservicio_productos; SHOW TABLES;" : para ejecutar la base de datos y mostrar las tablas creadas actualmente 
