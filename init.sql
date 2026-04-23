@@ -36,7 +36,7 @@ CREATE TABLE Pedido (
     Proveedor_id INT,
     Fecha_emision DATE,
     estado VARCHAR(50),
-    total DECIMAL(10,2), -- DECIMAL es ideal para dinero/totales
+    total DECIMAL(10,2), 
     FOREIGN KEY (Proveedor_id) REFERENCES Proveedor(Proveedor_id)
 );
 
