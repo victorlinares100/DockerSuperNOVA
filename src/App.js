@@ -1,53 +1,89 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-// Puedes dejar el import de Confetti si quieres, pero lo quité para mantenerlo simple por ahora
 
 const App = () => {
-  // 1. Creamos un espacio en memoria para guardar los productos
-  const [productos, setProductos] = useState([]);
 
-  // 2. Usamos useEffect para ir a buscar los datos al backend cuando cargue la página
+  const [productos, setProductos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
+  const [bodegas, setBodegas] = useState([]);
+
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/productos")
-      .then((response) => response.json())
-      .then((data) => {
-        setProductos(data); // Guardamos los datos que llegaron
-      })
-      .catch((error) => console.error("Error al buscar productos:", error));
-  }, []); // Los corchetes vacíos significan "ejecuta esto solo una vez al cargar"
+    const fetchData = async () => {
+      try {
+        const resProd = await fetch("http://localhost:8080/api/v1/productos");
+        setProductos(await resProd.json());
+
+        const resCat = await fetch("http://localhost:8080/api/v1/categorias");
+        setCategorias(await resCat.json());
+
+        const resProv = await fetch("http://localhost:8080/api/v1/proveedores");
+        setProveedores(await resProv.json());
+
+        const resBod = await fetch("http://localhost:8080/api/v1/bodegas");
+        setBodegas(await resBod.json());
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="App">
       <header className="App-header">
-        <h1 style={{ marginBottom: "0px" }}>Supermercado NOVA</h1>
-        <p style={{ marginTop: "10px", marginBottom: "50px" }}>
-          Lista de Productos Disponibles
-        </p>
-
-        {/* 3. Dibujamos los productos en la pantalla */}
-        <div style={{ textAlign: "left", width: "80%", maxWidth: "600px" }}>
-          {productos.length > 0 ? (
-            productos.map((producto) => (
-              <div 
-                key={producto.id} 
-                style={{ 
-                  border: "1px solid white", 
-                  padding: "15px", 
-                  marginBottom: "10px", 
-                  borderRadius: "8px" 
-                }}
-              >
-                <h3>{producto.nombre}</h3>
-                <p><strong>Código de Barras:</strong> {producto.codigoDeBarras}</p>
-                <p><strong>Descripción:</strong> {producto.descripcion}</p>
-                <p><strong>Categoría:</strong> {producto.categoria ? producto.categoria.nombreCategoria : "Sin categoría"}</p>
-              </div>
-            ))
-          ) : (
-            <p>Cargando productos o no hay productos disponibles...</p>
-          )}
-        </div>
+        <h1>Dashboard Supermercado NOVA</h1>
+        <p>Gestión de Inventario en Tiempo Real</p>
       </header>
+
+      <main className="dashboard-grid">
+        {/* Sección Productos */}
+        <section className="data-card">
+          <h2> Productos</h2>
+          <div className="list-container">
+            {productos.map(p => (
+              <div key={p.id} className="item-row">
+                <strong>{p.nombre}</strong> - {p.categoria?.Nombre_Categoria || 'S/C'}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Sección Categorías */}
+        <section className="data-card">
+          <h2> Categorías</h2>
+          <div className="list-container">
+            {categorias.map(c => (
+              <div key={c.id} className="item-row">{c.Nombre_Categoria}</div>
+            ))}
+          </div>
+        </section>
+
+        {/* Sección Proveedores */}
+        <section className="data-card">
+          <h2> Proveedores</h2>
+          <div className="list-container">
+            {proveedores.map(pr => (
+              <div key={pr.id} className="item-row">
+                <strong>{pr.rutEmpresa}</strong> - {pr.email}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Sección Bodegas */}
+        <section className="data-card">
+          <h2> Bodegas</h2>
+          <div className="list-container">
+            {bodegas.map(b => (
+              <div key={b.id} className="item-row">
+                <strong>{b.sucursal}</strong> <br/> <small>{b.direccion}</small>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
     </div>
   );
 };

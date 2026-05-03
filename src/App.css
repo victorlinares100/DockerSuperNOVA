@@ -1,54 +1,71 @@
+/* Contenedor principal con fondo degradado moderno */
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-.App-header {
-  background-color: #003f8c;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  color: #2d3436;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-.fa-brands {
-  padding: 20px;
-  font-size: 30px;
-  width: 50px;
-  margin: 10px;
+/* Encabezado más limpio */
+.App-header {
+  padding: 40px 20px;
   text-align: center;
-  text-decoration: none;
-}
-
-.fa-brands:hover {
-  opacity: 0.7;
-}
-
-/* Twitter */
-.fa-x-twitter {
-  background: #55acee;
+  background: #003f8c;
   color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* Linkedin */
-.fa-linkedin {
-  background: #55acee;
-  color: white;
+.App-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  letter-spacing: 1px;
 }
 
-/* Reddit */
-.fa-reddit {
-  background: #55acee;
-  color: white;
+/* La cuadrícula mágica para las 4 tablas */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Diseño de cada "Tarjeta" de tabla */
+.data-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+}
+
+.data-card:hover {
+  transform: translateY(-5px);
+}
+
+.data-card h2 {
+  border-bottom: 2px solid #003f8c;
+  padding-bottom: 10px;
+  color: #003f8c;
+  font-size: 1.4rem;
+}
+
+/* Filas de la lista */
+.list-container {
+  margin-top: 15px;
+}
+
+.item-row {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-row strong {
+  color: #0984e3;
 }
