@@ -5,7 +5,7 @@ Este proyecto es un sistema de gestión de inventario en tiempo real que utiliza
 2 . clonar el repositorio : https://github.com/victorlinares100/DockerSuperNOVA.git y realizar un cd a la carpeta 
 
 3 . **docker compose up -d ** 
-para levantar todos los servicios 
+para levantar todos los servicios (desde la terminal del visual studio o el cmd )
 
 4 . **docker compose exec mi_base_de_datos mariadb -u root -proot -e "USE microservicio_productos; SHOW TABLES;" ** 
 Entra al contenedor de la base de datos (que ya está corriendo) y ejecuta una consulta SQL automática para mostrar la lista de tablas que se crearon con el archivo init.sql.
