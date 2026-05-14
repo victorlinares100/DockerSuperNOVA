@@ -71,3 +71,39 @@ CREATE TABLE Movimiento_Stock (
     descripcion TEXT,
     FOREIGN KEY (Stock_id) REFERENCES Stock(Stock_id)
 );
+
+
+ALTER TABLE Producto
+  ADD COLUMN precio_venta   DECIMAL(10,2) NOT NULL DEFAULT 0,
+  ADD COLUMN stock_minimo   INT           NOT NULL DEFAULT 0,
+  ADD COLUMN Proveedor_id   INT,
+  ADD FOREIGN KEY (Proveedor_id) REFERENCES Proveedor(Proveedor_id);
+
+ALTER TABLE Stock
+  ADD COLUMN stock_minimo INT NOT NULL DEFAULT 0;
+
+
+ALTER TABLE Movimiento_Stock
+  ADD COLUMN tipo_movimiento ENUM('ENTRADA','SALIDA','VENTA','AJUSTE')
+    NOT NULL DEFAULT 'ENTRADA';
+
+
+-- ─── TABLAS NUEVAS ───────────────────────────────────────────────
+
+CREATE TABLE Venta (
+    Venta_id     INT AUTO_INCREMENT PRIMARY KEY,
+    Bodega_id    INT,
+    fecha_venta  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    total        DECIMAL(10,2) NOT NULL DEFAULT 0,
+    FOREIGN KEY (Bodega_id) REFERENCES Bodega(Bodega_id)
+);
+
+CREATE TABLE Detalle_Venta (
+    Detalle_Venta_id INT AUTO_INCREMENT PRIMARY KEY,
+    Venta_id         INT NOT NULL,
+    Producto_id      INT NOT NULL,
+    cantidad         INT            NOT NULL,
+    precio_unitario  DECIMAL(10,2)  NOT NULL,
+    FOREIGN KEY (Venta_id)    REFERENCES Venta(Venta_id),
+    FOREIGN KEY (Producto_id) REFERENCES Producto(producto_id)
+);
