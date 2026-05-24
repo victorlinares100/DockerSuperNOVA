@@ -10,17 +10,18 @@ const FORM_VACIO = {
 };
 
 export default function Productos() {
-  const { data, loading, error, refetch } = useFetch("/productos");
-  const { data: categorias }              = useFetch("/categorias");
+  const { data,          loading,  error,   refetch } = useFetch("/productos");
+  const { data: stocks }                              = useFetch("/stocks");
+  const { data: categorias }                          = useFetch("/categorias");
 
   const [busqueda,      setBusqueda]      = useState("");
   const [mostrarForm,   setMostrarForm]   = useState(false);
-  const [modoEditar,    setModoEditar]    = useState(false);   // false = crear, true = editar
+  const [modoEditar,    setModoEditar]    = useState(false);
   const [form,          setForm]          = useState(FORM_VACIO);
   const [guardando,     setGuardando]     = useState(false);
   const [errorForm,     setErrorForm]     = useState("");
   const [exito,         setExito]         = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(null);    // id del producto a eliminar
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [eliminando,    setEliminando]    = useState(false);
 
   useEffect(() => {
@@ -29,20 +30,26 @@ export default function Productos() {
     return () => window.removeEventListener("keydown", fn);
   }, []);
 
+  // ─── Cruzar stock con productos ───────────────────────────────
+  // Para cada producto sumamos todas las unidades en todas las bodegas
+  function stockDeProducto(productoId) {
+    if (!stocks) return null;
+    const registros = stocks.filter(s => s.producto?.id === productoId);
+    if (registros.length === 0) return null;
+    const total   = registros.reduce((acc, s) => acc + (s.cantidadDisponible ?? 0), 0);
+    const minimo  = registros.reduce((acc, s) => acc + (s.stockMinimo ?? 0), 0);
+    return { total, minimo, registros: registros.length };
+  }
+
   const lista = (data ?? []).filter(p =>
     p.nombre?.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  // ─── Abrir formulario en modo CREAR ──────────────────────────
   function abrirCrear() {
-    setForm(FORM_VACIO);
-    setModoEditar(false);
-    setMostrarForm(true);
-    setErrorForm("");
-    setExito("");
+    setForm(FORM_VACIO); setModoEditar(false);
+    setMostrarForm(true); setErrorForm(""); setExito("");
   }
 
-  // ─── Abrir formulario en modo EDITAR ─────────────────────────
   function abrirEditar(p) {
     setForm({
       id:             p.id,
@@ -52,29 +59,20 @@ export default function Productos() {
       precioVenta:    p.precioVenta    != null ? String(p.precioVenta) : "",
       categoria:      { id: p.categoria?.id ? String(p.categoria.id) : "" },
     });
-    setModoEditar(true);
-    setMostrarForm(true);
-    setErrorForm("");
-    setExito("");
+    setModoEditar(true); setMostrarForm(true); setErrorForm(""); setExito("");
   }
 
   function cerrarForm() {
-    setMostrarForm(false);
-    setForm(FORM_VACIO);
-    setErrorForm("");
-    setModoEditar(false);
+    setMostrarForm(false); setForm(FORM_VACIO);
+    setErrorForm(""); setModoEditar(false);
   }
 
   function handleChange(e) {
     const { name, value } = e.target;
-    if (name === "categoriaId") {
-      setForm(f => ({ ...f, categoria: { id: value } }));
-    } else {
-      setForm(f => ({ ...f, [name]: value }));
-    }
+    if (name === "categoriaId") setForm(f => ({ ...f, categoria: { id: value } }));
+    else                        setForm(f => ({ ...f, [name]: value }));
   }
 
-  // ─── Guardar (crear o editar) ─────────────────────────────────
   async function handleSubmit(e) {
     e.preventDefault();
     setErrorForm("");
@@ -88,33 +86,24 @@ export default function Productos() {
       precioVenta:    form.precioVenta !== "" ? Number(form.precioVenta) : null,
       categoria:      { id: Number(form.categoria.id) },
     };
-
     const url    = modoEditar ? `${API}/productos/${form.id}` : `${API}/productos`;
     const method = modoEditar ? "PUT" : "POST";
 
     setGuardando(true);
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg || `Error ${res.status}`);
-      }
+      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error((await res.text()) || `Error ${res.status}`);
       cerrarForm();
-      setExito(modoEditar ? "Producto actualizado correctamente." : "Producto creado correctamente.");
+      setExito(modoEditar ? "Producto actualizado." : "Producto creado.");
       setTimeout(() => setExito(""), 3000);
       refetch();
     } catch (err) {
-      setErrorForm(err.message || "No se pudo guardar el producto.");
+      setErrorForm(err.message || "No se pudo guardar.");
     } finally {
       setGuardando(false);
     }
   }
 
-  // ─── Eliminar ─────────────────────────────────────────────────
   async function handleEliminar() {
     if (!confirmDelete) return;
     setEliminando(true);
@@ -122,21 +111,15 @@ export default function Productos() {
       const res = await fetch(`${API}/productos/${confirmDelete}`, { method: "DELETE" });
       if (!res.ok && res.status !== 204) throw new Error(`Error ${res.status}`);
       setConfirmDelete(null);
-      setExito("Producto eliminado correctamente.");
+      setExito("Producto eliminado.");
       setTimeout(() => setExito(""), 3000);
       refetch();
-    } catch (err) {
-      setConfirmDelete(null);
-      setExito("");
-    } finally {
-      setEliminando(false);
-    }
+    } catch { setConfirmDelete(null); }
+    finally  { setEliminando(false); }
   }
 
-  const fmtPrecio = n => n != null ? `$${Number(n).toLocaleString("es-CL")}` : "—";
-
-  // Nombre del producto que se va a eliminar
-  const nombreAEliminar = (data ?? []).find(p => p.id === confirmDelete)?.nombre ?? "";
+  const fmtPrecio      = n  => n != null ? `$${Number(n).toLocaleString("es-CL")}` : "—";
+  const nombreEliminar = (data ?? []).find(p => p.id === confirmDelete)?.nombre ?? "";
 
   return (
     <div className="page-wrapper">
@@ -145,107 +128,73 @@ export default function Productos() {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
         <div>
           <h1 className="page-title">Productos</h1>
-          <p className="page-sub">Catálogo completo de productos</p>
+          <p className="page-sub">Catálogo completo — stock en tiempo real</p>
         </div>
         <button onClick={abrirCrear} style={btnPrimary}>+ Nuevo producto</button>
       </div>
 
-      {/* Éxito */}
       {exito && <div style={exitoStyle}>✓ {exito}</div>}
 
-      {/* ── Modal confirmar eliminar ── */}
+      {/* ── Modal eliminar ── */}
       {confirmDelete && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,.45)",
-          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200,
-        }}>
-          <div style={{
-            background: "var(--surface)", borderRadius: "var(--radius-lg)",
-            padding: "28px 32px", maxWidth: 400, width: "90%",
-            boxShadow: "0 8px 32px rgba(0,0,0,.18)",
-          }}>
-            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 10, color: "var(--navy)" }}>
-              ¿Eliminar producto?
-            </div>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
+          <div style={{ background: "var(--surface)", borderRadius: "var(--radius-lg)", padding: "28px 32px", maxWidth: 400, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,.18)" }}>
+            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 10, color: "var(--navy)" }}>¿Eliminar producto?</div>
             <p style={{ fontSize: 14, color: "var(--muted)", marginBottom: 24 }}>
-              Vas a eliminar <strong style={{ color: "var(--text)" }}>"{nombreAEliminar}"</strong>.
-              Esta acción no se puede deshacer.
+              Vas a eliminar <strong style={{ color: "var(--text)" }}>"{nombreEliminar}"</strong>. Esta acción no se puede deshacer.
             </p>
             <div style={{ display: "flex", gap: 10 }}>
-              <button
-                onClick={handleEliminar}
-                disabled={eliminando}
-                style={{ ...btnPrimary, background: "var(--danger)", opacity: eliminando ? 0.6 : 1 }}
-              >
+              <button onClick={handleEliminar} disabled={eliminando}
+                style={{ ...btnPrimary, background: "var(--danger)", opacity: eliminando ? 0.6 : 1 }}>
                 {eliminando ? "Eliminando…" : "Sí, eliminar"}
               </button>
-              <button onClick={() => setConfirmDelete(null)} style={btnSecondary}>
-                Cancelar
-              </button>
+              <button onClick={() => setConfirmDelete(null)} style={btnSecondary}>Cancelar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Formulario crear / editar ── */}
+      {/* ── Formulario ── */}
       {mostrarForm && (
         <div className="card" style={{ borderColor: "var(--accent)", borderWidth: 1.5, marginBottom: 24 }}>
           <div className="card-title">
             {modoEditar ? `Editando: ${form.nombre}` : "Nuevo producto"}
-            <button onClick={cerrarForm} style={closeBtn} title="Cerrar (Esc)">×</button>
+            <button onClick={cerrarForm} style={closeBtn} title="Esc">×</button>
           </div>
-
           <form onSubmit={handleSubmit}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-
               <div style={field}>
                 <label style={lbl}>Nombre <Req /></label>
-                <input style={inp} name="nombre" value={form.nombre}
-                  onChange={handleChange} placeholder="Ej: Leche Entera 1L" autoFocus />
+                <input style={inp} name="nombre" value={form.nombre} onChange={handleChange} placeholder="Ej: Leche Entera 1L" autoFocus />
               </div>
-
               <div style={field}>
                 <label style={lbl}>Código de barras</label>
-                <input style={inp} name="codigoDeBarras" value={form.codigoDeBarras}
-                  onChange={handleChange} placeholder="Ej: 7802000123456" />
+                <input style={inp} name="codigoDeBarras" value={form.codigoDeBarras} onChange={handleChange} placeholder="Ej: 7802000123456" />
               </div>
-
               <div style={field}>
                 <label style={lbl}>Categoría <Req /></label>
-                <select style={inp} name="categoriaId"
-                  value={form.categoria.id} onChange={handleChange}>
+                <select style={inp} name="categoriaId" value={form.categoria.id} onChange={handleChange}>
                   <option value="">— Seleccionar —</option>
                   {(categorias ?? []).map(c => (
                     <option key={c.id} value={c.id}>{c.Nombre_Categoria}</option>
                   ))}
                 </select>
               </div>
-
               <div style={field}>
                 <label style={lbl}>Precio de venta</label>
                 <div style={{ position: "relative" }}>
                   <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--muted)", fontSize: 13 }}>$</span>
-                  <input style={{ ...inp, paddingLeft: 22 }} name="precioVenta"
-                    type="number" min="0" step="1" value={form.precioVenta}
-                    onChange={handleChange} placeholder="0" />
+                  <input style={{ ...inp, paddingLeft: 22 }} name="precioVenta" type="number" min="0" step="1" value={form.precioVenta} onChange={handleChange} placeholder="0" />
                 </div>
               </div>
-
               <div style={{ ...field, gridColumn: "1 / -1" }}>
                 <label style={lbl}>Descripción</label>
-                <input style={inp} name="descripcion" value={form.descripcion}
-                  onChange={handleChange} placeholder="Opcional" />
+                <input style={inp} name="descripcion" value={form.descripcion} onChange={handleChange} placeholder="Opcional" />
               </div>
-
             </div>
-
-            {errorForm && (
-              <p style={{ fontSize: 13, color: "var(--danger)", marginBottom: 14 }}>⚠ {errorForm}</p>
-            )}
-
+            {errorForm && <p style={{ fontSize: 13, color: "var(--danger)", marginBottom: 14 }}>⚠ {errorForm}</p>}
             <div style={{ display: "flex", gap: 10 }}>
-              <button type="submit" disabled={guardando}
-                style={{ ...btnPrimary, opacity: guardando ? 0.6 : 1 }}>
+              <button type="submit" disabled={guardando} style={{ ...btnPrimary, opacity: guardando ? 0.6 : 1 }}>
                 {guardando ? "Guardando…" : modoEditar ? "Guardar cambios" : "Crear producto"}
               </button>
               <button type="button" onClick={cerrarForm} style={btnSecondary}>Cancelar</button>
@@ -275,53 +224,69 @@ export default function Productos() {
                   <th>Nombre</th>
                   <th>Categoría</th>
                   <th>Precio venta</th>
-                  <th>Descripción</th>
-                  <th style={{ width: 100, textAlign: "center" }}>Acciones</th>
+                  <th>Stock total</th>
+                  <th>Estado</th>
+                  <th style={{ width: 110, textAlign: "center" }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {lista.length === 0
-                  ? <tr><td colSpan={5} className="state-msg">Sin resultados</td></tr>
-                  : lista.map(p => (
-                      <tr key={p.id}>
-                        <td style={{ fontWeight: 500 }}>{p.nombre}</td>
-                        <td>{p.categoria?.Nombre_Categoria || "—"}</td>
-                        <td style={{ fontFamily: "var(--mono)", fontSize: 13, fontWeight: 600, color: "var(--navy)" }}>
-                          {fmtPrecio(p.precioVenta)}
-                        </td>
-                        <td style={{ color: "var(--muted)", fontSize: 13 }}>{p.descripcion || "—"}</td>
-                        <td>
-                          <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                            {/* Editar */}
-                            <button
-                              onClick={() => abrirEditar(p)}
-                              title="Editar"
-                              style={{
-                                padding: "5px 10px", fontSize: 12, fontWeight: 500,
-                                background: "var(--accent-light)", color: "var(--accent)",
-                                border: "1px solid #bfdbfe", borderRadius: "var(--radius)",
-                                cursor: "pointer", fontFamily: "var(--font)",
-                              }}
-                            >
-                              Editar
-                            </button>
-                            {/* Eliminar */}
-                            <button
-                              onClick={() => setConfirmDelete(p.id)}
-                              title="Eliminar"
-                              style={{
-                                padding: "5px 10px", fontSize: 12, fontWeight: 500,
-                                background: "var(--danger-bg)", color: "var(--danger)",
-                                border: "1px solid #fca5a5", borderRadius: "var(--radius)",
-                                cursor: "pointer", fontFamily: "var(--font)",
-                              }}
-                            >
-                              Eliminar
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                  ? <tr><td colSpan={6} className="state-msg">Sin resultados</td></tr>
+                  : lista.map(p => {
+                      const stock = stockDeProducto(p.id);
+                      return (
+                        <tr key={p.id}>
+                          <td style={{ fontWeight: 500 }}>{p.nombre}</td>
+                          <td>{p.categoria?.Nombre_Categoria || "—"}</td>
+                          <td style={{ fontFamily: "var(--mono)", fontSize: 13, fontWeight: 600, color: "var(--navy)" }}>
+                            {fmtPrecio(p.precioVenta)}
+                          </td>
+
+                          {/* Stock con barra visual */}
+                          <td>
+                            {stock === null ? (
+                              <span style={{ fontSize: 12, color: "var(--muted)" }}>Sin stock</span>
+                            ) : (
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <div style={{ width: 56, height: 5, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
+                                  <div style={{
+                                    height: "100%", borderRadius: 3,
+                                    width: Math.min(100, (stock.total / Math.max(stock.minimo * 2, 50)) * 100) + "%",
+                                    background: stock.total <= 0        ? "#ef4444"
+                                              : stock.total < stock.minimo ? "#f59e0b"
+                                              : "#16a34a",
+                                  }} />
+                                </div>
+                                <span style={{ fontFamily: "var(--mono)", fontSize: 13 }}>
+                                  {stock.total}
+                                </span>
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Badge estado */}
+                          <td>
+                            {stock === null ? (
+                              <span className="badge badge-danger">Sin stock</span>
+                            ) : stock.total <= 0 ? (
+                              <span className="badge badge-danger">Agotado</span>
+                            ) : stock.total < stock.minimo ? (
+                              <span className="badge badge-warn">Stock bajo</span>
+                            ) : (
+                              <span className="badge badge-ok">Normal</span>
+                            )}
+                          </td>
+
+                          {/* Acciones */}
+                          <td>
+                            <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+                              <button onClick={() => abrirEditar(p)} style={btnEditar}>Editar</button>
+                              <button onClick={() => setConfirmDelete(p.id)} style={btnEliminar}>Eliminar</button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                 }
               </tbody>
             </table>
@@ -341,3 +306,5 @@ const btnPrimary   = { padding: "9px 18px", background: "var(--accent)", color: 
 const btnSecondary = { padding: "9px 16px", background: "transparent", color: "var(--muted)", border: "1px solid var(--border)", borderRadius: "var(--radius)", fontSize: 13, fontFamily: "var(--font)", cursor: "pointer" };
 const closeBtn     = { marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "var(--muted)", lineHeight: 1 };
 const exitoStyle   = { background: "var(--ok-bg)", color: "var(--ok)", border: "1px solid #86efac", borderRadius: "var(--radius)", padding: "10px 16px", fontSize: 13, fontWeight: 500, marginBottom: 16 };
+const btnEditar    = { padding: "5px 10px", fontSize: 12, fontWeight: 500, background: "var(--accent-light)", color: "var(--accent)", border: "1px solid #bfdbfe", borderRadius: "var(--radius)", cursor: "pointer", fontFamily: "var(--font)" };
+const btnEliminar  = { padding: "5px 10px", fontSize: 12, fontWeight: 500, background: "var(--danger-bg)", color: "var(--danger)", border: "1px solid #fca5a5", borderRadius: "var(--radius)", cursor: "pointer", fontFamily: "var(--font)" };

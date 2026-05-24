@@ -1,12 +1,13 @@
 const LINKS = [
-  { id: "inicio",      label: "Inicio" },
-  { id: "productos",   label: "Productos" },
-  { id: "stock",       label: "Stock" },
-  { id: "ventas",      label: "Ventas" },
-  { id: "categorias",  label: "Categorías" },
-  { id: "proveedores", label: "Proveedores" },
-  { id: "bodegas",     label: "Bodegas" },
-  { id: "pedidos",     label: "Pedidos" },
+  { id: "inicio",       label: "Inicio" },
+  { id: "productos",    label: "Productos" },
+  { id: "stock",        label: "Stock" },
+  { id: "ventas",       label: "Ventas" },
+  { id: "movimientos",  label: "Movimientos" },
+  { id: "categorias",   label: "Categorías" },
+  { id: "proveedores",  label: "Proveedores" },
+  { id: "bodegas",      label: "Bodegas" },
+  { id: "pedidos",      label: "Pedidos" },
 ];
 
 export default function Navbar({ pagina, setPagina }) {
@@ -34,7 +35,7 @@ export default function Navbar({ pagina, setPagina }) {
             <button key={l.id} onClick={() => setPagina(l.id)} style={{
               background: pagina === l.id ? "rgba(255,255,255,.12)" : "none",
               border: "none", cursor: "pointer",
-              padding: "7px 12px", borderRadius: "var(--radius)",
+              padding: "7px 11px", borderRadius: "var(--radius)",
               fontSize: 13,
               fontWeight: pagina === l.id ? 600 : 400,
               color: pagina === l.id ? "#fff" : "rgba(255,255,255,.70)",
