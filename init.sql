@@ -107,3 +107,4 @@ CREATE TABLE Detalle_Venta (
     FOREIGN KEY (Venta_id)    REFERENCES Venta(Venta_id),
     FOREIGN KEY (Producto_id) REFERENCES Producto(producto_id)
 );
+
