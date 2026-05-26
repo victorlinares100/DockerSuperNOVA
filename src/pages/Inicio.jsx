@@ -1,4 +1,7 @@
-import useFetch from "../hooks/useFetch";
+import "../css/Inicio.css";
+import useFetch  from "../hooks/useFetch";
+import DataTable from "../atoms/DataTable";
+import EmptyRow  from "../atoms/EmptyRow";
 
 export default function Inicio() {
   const { data: productos }  = useFetch("/productos");
@@ -13,23 +16,17 @@ export default function Inicio() {
   return (
     <>
       {/* Hero banner */}
-      <div style={{
-        background: "linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%)",
-        padding: "56px 32px",
-        color: "#fff",
-      }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.03em", marginBottom: 8 }}>
-            Dashboard Supermercado NOVA
-          </h1>
-          <p style={{ fontSize: 15, color: "rgba(255,255,255,.65)", maxWidth: 480 }}>
+      <div className="hero">
+        <div className="hero-inner">
+          <h1 className="hero-title">Dashboard Supermercado NOVA</h1>
+          <p className="hero-sub">
             Gestión de inventario en tiempo real — stock, proveedores, bodegas y pedidos en un solo lugar.
           </p>
         </div>
       </div>
 
-      {/* KPIs */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 32px 0" }}>
+      {/* KPIs + tabla */}
+      <div className="inicio-body">
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Productos</div>
@@ -48,37 +45,26 @@ export default function Inicio() {
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Pedidos pendientes</div>
-            <div className="kpi-value" style={{ color: pendientes > 0 ? "var(--warn)" : undefined }}>
+            <div className={`kpi-value${pendientes > 0 ? " kpi-value-warn" : ""}`}>
               {pedidos ? pendientes : "…"}
             </div>
             <div className="kpi-sub">por recibir</div>
           </div>
         </div>
 
-        {/* Tabla resumen */}
         <div className="card">
           <div className="card-title">Últimos productos registrados</div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Categoría</th>
-                </tr>
-              </thead>
-              <tbody>
-                {productos === null && (
-                  <tr><td colSpan={2} className="state-msg">Cargando…</td></tr>
-                )}
-                {(productos ?? []).slice(0, 5).map(p => (
+          <DataTable headers={["Nombre", "Categoría"]}>
+            {productos === null
+              ? <EmptyRow cols={2} mensaje="Cargando…" />
+              : (productos ?? []).slice(0, 5).map(p => (
                   <tr key={p.id}>
                     <td style={{ fontWeight: 500 }}>{p.nombre}</td>
                     <td>{p.categoria?.Nombre_Categoria || "Sin categoría"}</td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                ))
+            }
+          </DataTable>
         </div>
       </div>
     </>
