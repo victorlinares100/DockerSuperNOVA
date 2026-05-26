@@ -1,4 +1,7 @@
 import useFetch from "../hooks/useFetch";
+import PageHeader from "../molecules/PageHeader";
+import StateMsg from "../atoms/StateMsg";
+import "../css/Proveedores.css"; 
 
 const COLORES = [
   { bg: "#dbeafe", fg: "#1e40af" },
@@ -13,25 +16,28 @@ export default function Proveedores() {
 
   return (
     <div className="page-wrapper">
-      <h1 className="page-title">Proveedores</h1>
-      <p className="page-sub">Empresas que abastecen el supermercado</p>
+      <PageHeader 
+        title="Proveedores" 
+        sub="Empresas que abastecen el supermercado" 
+      />
 
-      {loading && <p className="state-msg">Cargando…</p>}
-      {error   && <p className="state-msg state-error">Error: {error}</p>}
+      <StateMsg loading={loading} error={error} />
 
       {!loading && !error && (
         <div className="cards-grid">
           {(data ?? []).map((pr, i) => {
             const { bg, fg } = COLORES[i % COLORES.length];
             const iniciales = (pr.rutEmpresa ?? "??").slice(0, 2).toUpperCase();
+            
             return (
               <div key={pr.id} className="info-card">
                 <div className="avatar" style={{ background: bg, color: fg }}>
                   {iniciales}
                 </div>
-                <div style={{ flex: 1 }}>
+                
+                <div className="info-card-content">
                   <div className="info-card-name">
-                    {pr.descripcion || "Proveedor " + pr.id}
+                    {pr.descripcion || `Proveedor ${pr.id}`}
                   </div>
                   <div className="info-card-sub">RUT: {pr.rutEmpresa || "—"}</div>
                   <div className="info-card-meta">
@@ -42,6 +48,7 @@ export default function Proveedores() {
               </div>
             );
           })}
+          
           {data?.length === 0 && (
             <p className="state-msg">Sin proveedores registrados</p>
           )}

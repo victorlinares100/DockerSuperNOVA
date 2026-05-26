@@ -1,0 +1,208 @@
+/* ── Header de página ────────────────────────────────────────── */
+.page-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+/* ── Mensaje de éxito ────────────────────────────────────────── */
+.msg-exito {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border: 1px solid #86efac;
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+/* ── Mensaje de error en formulario ─────────────────────────── */
+.msg-error-form {
+  font-size: 13px;
+  color: var(--danger);
+  margin-bottom: 14px;
+}
+
+/* ── Card formulario activo ──────────────────────────────────── */
+.card-form {
+  border-color: var(--accent);
+  border-width: 1.5px;
+  margin-bottom: 24px;
+}
+
+/* ── Grilla superior del formulario ─────────────────────────── */
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* ── Campo del formulario ────────────────────────────────────── */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.form-input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  width: 100%;
+}
+
+.form-input-precio {
+  padding-left: 22px;
+}
+
+/* ── Cabecera de líneas ──────────────────────────────────────── */
+.lineas-header {
+  display: grid;
+  grid-template-columns: 1fr 100px 130px 36px;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.lineas-header-item {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Fila de línea ───────────────────────────────────────────── */
+.linea-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 130px 36px;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+/* ── Prefijo $ en input precio ───────────────────────────────── */
+.input-precio-wrap {
+  position: relative;
+}
+
+.input-precio-prefix {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* ── Botón quitar línea ──────────────────────────────────────── */
+.btn-quitar {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btn-quitar:not(:disabled) { color: var(--danger); cursor: pointer; }
+.btn-quitar:disabled       { color: var(--muted);  cursor: not-allowed; }
+
+/* ── Total del pedido ────────────────────────────────────────── */
+.total-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.total-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.total-valor { font-size: 22px; font-weight: 700; color: var(--navy); font-family: var(--mono); }
+
+/* ── Botones del formulario ──────────────────────────────────── */
+.btn-primary {
+  padding: 9px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-secondary {
+  padding: 9px 16px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+.btn-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.btn-editar {
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font);
+}
+
+.btn-row { display: flex; gap: 10px; }
+
+/* ── Tabla ───────────────────────────────────────────────────── */
+.th-acciones { width: 120px; text-align: center; }
+.td-productos { font-size: 12px; color: var(--muted); }
+.td-total     { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.td-acciones  { text-align: center; }
+
+/* ── Select de estado inline ─────────────────────────────────── */
+.select-estado-inline {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  width: 100%;
+}

@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 import useFetch, { API } from "../hooks/useFetch";
+import DataTable from "../atoms/DataTable";
+import EmptyRow from "../atoms/EmptyRow";
+import StateMsg from "../atoms/StateMsg";
+import PageHeader from "../molecules/PageHeader";
+import "../css/Stock.css";
 
 const FORM_VACIO = {
   producto:           { id: "" },
@@ -11,9 +16,9 @@ const FORM_VACIO = {
 };
 
 export default function Stock() {
-  const { data,         loading,  error,   refetch } = useFetch("/stocks");
-  const { data: productos }                          = useFetch("/productos");
-  const { data: bodegas }                            = useFetch("/bodegas");
+  const { data,          loading,  error,   refetch } = useFetch("/stocks");
+  const { data: productos }                           = useFetch("/productos");
+  const { data: bodegas }                             = useFetch("/bodegas");
 
   const [mostrarForm, setMostrarForm] = useState(false);
   const [form,        setForm]        = useState(FORM_VACIO);
@@ -53,7 +58,7 @@ export default function Stock() {
     setErrorForm("");
 
     if (!form.producto.id)         { setErrorForm("Selecciona un producto.");          return; }
-    if (!form.bodega.id)           { setErrorForm("Selecciona una bodega.");            return; }
+    if (!form.bodega.id)           { setErrorForm("Selecciona una bodega.");           return; }
     if (!form.cantidadDisponible || Number(form.cantidadDisponible) < 0) {
                                      setErrorForm("Ingresa una cantidad válida.");      return; }
     if (!form.fechaIngreso)        { setErrorForm("La fecha de ingreso es obligatoria."); return; }
@@ -99,37 +104,34 @@ export default function Stock() {
     <div className="page-wrapper">
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
-        <div>
-          <h1 className="page-title">Stock</h1>
-          <p className="page-sub">Inventario por producto y bodega</p>
-        </div>
-        <button onClick={abrirForm} style={btnPrimaryStyle}>
+        <PageHeader title="Stock" sub="Inventario por producto y bodega" />
+        <button onClick={abrirForm} className="btn-primary">
           + Registrar stock
         </button>
       </div>
 
       {/* Éxito */}
       {exito && (
-        <div style={exitoStyle}>✓ Stock registrado correctamente.</div>
+        <div className="msg-exito">✓ Stock registrado correctamente.</div>
       )}
 
       {/* ── Formulario ── */}
       {mostrarForm && (
-        <div className="card" style={{ borderColor: "var(--accent)", borderWidth: 1.5, marginBottom: 24 }}>
+        <div className="card card-form">
           <div className="card-title">
             Registrar stock
-            <button onClick={cerrarForm} style={closeBtnStyle} title="Cerrar (Esc)">×</button>
+            <button onClick={cerrarForm} className="btn-close" title="Cerrar (Esc)">×</button>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div className="form-grid-2">
 
               {/* Producto */}
-              <div style={fieldStyle}>
-                <label style={labelStyle}>
-                  Producto <span style={{ color: "var(--danger)" }}>*</span>
+              <div className="form-field">
+                <label className="form-label">
+                  Producto <Req />
                 </label>
-                <select name="productoId" value={form.producto.id} onChange={handleChange} style={inputStyle}>
+                <select name="productoId" value={form.producto.id} onChange={handleChange} className="form-input">
                   <option value="">— Seleccionar —</option>
                   {(productos ?? []).map(p => (
                     <option key={p.id} value={p.id}>{p.nombre}</option>
@@ -138,11 +140,11 @@ export default function Stock() {
               </div>
 
               {/* Bodega */}
-              <div style={fieldStyle}>
-                <label style={labelStyle}>
-                  Bodega <span style={{ color: "var(--danger)" }}>*</span>
+              <div className="form-field">
+                <label className="form-label">
+                  Bodega <Req />
                 </label>
-                <select name="bodegaId" value={form.bodega.id} onChange={handleChange} style={inputStyle}>
+                <select name="bodegaId" value={form.bodega.id} onChange={handleChange} className="form-input">
                   <option value="">— Seleccionar —</option>
                   {(bodegas ?? []).map(b => (
                     <option key={b.id} value={b.id}>{b.sucursal}</option>
@@ -151,9 +153,9 @@ export default function Stock() {
               </div>
 
               {/* Cantidad */}
-              <div style={fieldStyle}>
-                <label style={labelStyle}>
-                  Cantidad <span style={{ color: "var(--danger)" }}>*</span>
+              <div className="form-field">
+                <label className="form-label">
+                  Cantidad <Req />
                 </label>
                 <input
                   type="number"
@@ -162,14 +164,14 @@ export default function Stock() {
                   onChange={handleChange}
                   min="0"
                   placeholder="Ej: 50"
-                  style={inputStyle}
+                  className="form-input"
                   autoFocus
                 />
               </div>
 
               {/* Stock mínimo */}
-              <div style={fieldStyle}>
-                <label style={labelStyle}>Stock mínimo</label>
+              <div className="form-field">
+                <label className="form-label">Stock mínimo</label>
                 <input
                   type="number"
                   name="stockMinimo"
@@ -177,51 +179,51 @@ export default function Stock() {
                   onChange={handleChange}
                   min="0"
                   placeholder="Ej: 10"
-                  style={inputStyle}
+                  className="form-input"
                 />
-                <span style={{ fontSize: 11, color: "var(--muted)" }}>
+                <span className="form-hint">
                   Alerta cuando baje de este número
                 </span>
               </div>
 
               {/* Fecha ingreso */}
-              <div style={fieldStyle}>
-                <label style={labelStyle}>
-                  Fecha de ingreso <span style={{ color: "var(--danger)" }}>*</span>
+              <div className="form-field">
+                <label className="form-label">
+                  Fecha de ingreso <Req />
                 </label>
                 <input
                   type="date"
                   name="fechaIngreso"
                   value={form.fechaIngreso}
                   onChange={handleChange}
-                  style={inputStyle}
+                  className="form-input"
                 />
               </div>
 
               {/* Fecha vencimiento */}
-              <div style={fieldStyle}>
-                <label style={labelStyle}>Fecha de vencimiento</label>
+              <div className="form-field">
+                <label className="form-label">Fecha de vencimiento</label>
                 <input
                   type="date"
                   name="fechaVencimiento"
                   value={form.fechaVencimiento}
                   onChange={handleChange}
-                  style={inputStyle}
+                  className="form-input"
                 />
-                <span style={{ fontSize: 11, color: "var(--muted)" }}>Opcional — dejar vacío si no aplica</span>
+                <span className="form-hint">Opcional — dejar vacío si no aplica</span>
               </div>
 
             </div>
 
             {errorForm && (
-              <p style={{ fontSize: 13, color: "var(--danger)", marginBottom: 14 }}>⚠ {errorForm}</p>
+              <p className="msg-error-form">⚠ {errorForm}</p>
             )}
 
-            <div style={{ display: "flex", gap: 10 }}>
-              <button type="submit" disabled={guardando} style={{ ...btnPrimaryStyle, opacity: guardando ? 0.6 : 1 }}>
+            <div className="btn-row">
+              <button type="submit" disabled={guardando} className="btn-primary">
                 {guardando ? "Guardando…" : "Registrar stock"}
               </button>
-              <button type="button" onClick={cerrarForm} style={btnSecondaryStyle}>
+              <button type="button" onClick={cerrarForm} className="btn-secondary">
                 Cancelar
               </button>
             </div>
@@ -238,23 +240,15 @@ export default function Stock() {
         });
         if (alertas.length === 0) return null;
         return (
-          <div style={{
-            background: "#fef9c3", border: "1px solid #fde047",
-            borderRadius: "var(--radius-lg)", padding: "14px 20px",
-            marginBottom: 20,
-          }}>
-            <div style={{ fontWeight: 600, fontSize: 13, color: "#854d0e", marginBottom: 8 }}>
+          <div className="alert-banner">
+            <div className="alert-banner-title">
               ⚠ {alertas.length} producto{alertas.length !== 1 ? "s" : ""} con stock bajo
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <div className="alert-tags">
               {alertas.map(s => (
-                <span key={s.id} style={{
-                  background: "#fff", border: "1px solid #fde047",
-                  borderRadius: "var(--radius)", padding: "4px 10px",
-                  fontSize: 12, color: "#854d0e",
-                }}>
+                <span key={s.id} className="alert-tag">
                   {s.producto?.nombre || "—"}
-                  <span style={{ fontWeight: 600, marginLeft: 6 }}>
+                  <span className="alert-tag-bold">
                     {s.cantidadDisponible ?? 0} / {s.stockMinimo ?? 10} mín
                   </span>
                 </span>
@@ -278,88 +272,74 @@ export default function Stock() {
           </span>
         </div>
 
-        {loading && <p className="state-msg">Cargando stock…</p>}
-        {error   && <p className="state-msg state-error">Error: {error}</p>}
+        <StateMsg loading={loading} error={error} />
 
         {!loading && !error && (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Bodega</th>
-                  <th>Cantidad</th>
-                  <th>Mínimo</th>
-                  <th>Estado</th>
-                  <th>Ingreso</th>
-                  <th>Vencimiento</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lista.length === 0
-                  ? <tr><td colSpan={6} className="state-msg">Sin registros de stock</td></tr>
-                  : lista.map(s => {
-                      const { cls, txt } = estadoStock(s.cantidadDisponible ?? s.cantidad_disponible, s.stockMinimo);
-                      const vence = s.fechaVencimiento ?? s.fecha_vencimiento;
-                      const hoy   = new Date();
-                      const diasVence = vence
-                        ? Math.ceil((new Date(vence) - hoy) / (1000*60*60*24))
-                        : null;
+          <DataTable headers={["Producto", "Bodega", "Cantidad", "Mínimo", "Estado", "Ingreso", "Vencimiento"]}>
+            {lista.length === 0
+              ? <EmptyRow cols={7} mensaje="Sin registros de stock" />
+              : lista.map(s => {
+                  const { cls, txt } = estadoStock(s.cantidadDisponible ?? s.cantidad_disponible, s.stockMinimo);
+                  const vence = s.fechaVencimiento ?? s.fecha_vencimiento;
+                  const hoy   = new Date();
+                  const diasVence = vence
+                    ? Math.ceil((new Date(vence) - hoy) / (1000*60*60*24))
+                    : null;
 
-                      return (
-                        <tr key={s.id}>
-                          <td style={{ fontWeight: 500 }}>
-                            {s.producto?.nombre || "—"}
-                          </td>
-                          <td>{s.bodega?.sucursal || "—"}</td>
-                          <td>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <div style={{ width: 60, height: 5, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
-                                <div style={{
-                                  height: "100%", borderRadius: 3,
-                                  width: Math.min(100, ((s.cantidadDisponible ?? 0) / 100) * 100) + "%",
-                                  background: (s.cantidadDisponible ?? 0) < 10 ? "#ef4444"
-                                            : (s.cantidadDisponible ?? 0) < 30 ? "#f59e0b"
-                                            : "#16a34a",
-                                }}/>
-                              </div>
-                              <span style={{ fontFamily: "var(--mono)", fontSize: 13 }}>
-                                {s.cantidadDisponible ?? s.cantidad_disponible ?? 0}
-                              </span>
-                            </div>
-                          </td>
-                          <td><span className={cls}>{txt}</span></td>
-                          <td className="td-mono">{s.stockMinimo ?? 10}</td>
-                          <td className="td-mono">{fmtFecha(s.fechaIngreso ?? s.fecha_ingreso)}</td>
-                          <td>
-                            {!vence ? (
-                              <span style={{ color: "var(--muted)", fontSize: 12 }}>—</span>
-                            ) : diasVence < 0 ? (
-                              <span className="badge badge-danger">Vencido</span>
-                            ) : diasVence <= 7 ? (
-                              <span className="badge badge-warn">Vence en {diasVence}d</span>
-                            ) : (
-                              <span className="td-mono">{fmtFecha(vence)}</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })
-                }
-              </tbody>
-            </table>
-          </div>
+                  return (
+                    <tr key={s.id}>
+                      <td style={{ fontWeight: 500 }}>
+                        {s.producto?.nombre || "—"}
+                      </td>
+                      <td>{s.bodega?.sucursal || "—"}</td>
+                      
+                      {/* Cantidad y Barra */}
+                      <td>
+                        <div className="stock-container">
+                          <div className="stock-bar-bg">
+                            <div className="stock-bar-fill" style={{
+                              width: Math.min(100, ((s.cantidadDisponible ?? 0) / 100) * 100) + "%",
+                              background: (s.cantidadDisponible ?? 0) < 10 ? "#ef4444"
+                                        : (s.cantidadDisponible ?? 0) < 30 ? "#f59e0b"
+                                        : "#16a34a",
+                            }}/>
+                          </div>
+                          <span className="stock-text">
+                            {s.cantidadDisponible ?? s.cantidad_disponible ?? 0}
+                          </span>
+                        </div>
+                      </td>
+                      
+                      {/* Mínimo */}
+                      <td className="td-mono">{s.stockMinimo ?? 10}</td>
+                      
+                      {/* Estado */}
+                      <td><span className={cls}>{txt}</span></td>
+                      
+                      {/* Ingreso */}
+                      <td className="td-mono">{fmtFecha(s.fechaIngreso ?? s.fecha_ingreso)}</td>
+                      
+                      {/* Vencimiento */}
+                      <td>
+                        {!vence ? (
+                          <span style={{ color: "var(--muted)", fontSize: 12 }}>—</span>
+                        ) : diasVence < 0 ? (
+                          <span className="badge badge-danger">Vencido</span>
+                        ) : diasVence <= 7 ? (
+                          <span className="badge badge-warn">Vence en {diasVence}d</span>
+                        ) : (
+                          <span className="td-mono">{fmtFecha(vence)}</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+            }
+          </DataTable>
         )}
       </div>
     </div>
   );
 }
 
-// ─── Estilos ──────────────────────────────────────────────────────
-const fieldStyle      = { display: "flex", flexDirection: "column", gap: 5 };
-const labelStyle      = { fontSize: 13, fontWeight: 500, color: "var(--text)" };
-const inputStyle      = { padding: "9px 12px", border: "1px solid var(--border)", borderRadius: "var(--radius)", fontSize: 14, fontFamily: "var(--font)", background: "var(--bg)", color: "var(--text)", outline: "none", width: "100%" };
-const btnPrimaryStyle = { padding: "9px 18px", background: "var(--accent)", color: "#fff", border: "none", borderRadius: "var(--radius)", fontSize: 14, fontWeight: 600, fontFamily: "var(--font)", cursor: "pointer" };
-const btnSecondaryStyle = { padding: "9px 18px", background: "transparent", color: "var(--muted)", border: "1px solid var(--border)", borderRadius: "var(--radius)", fontSize: 14, fontFamily: "var(--font)", cursor: "pointer" };
-const closeBtnStyle   = { marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "var(--muted)", lineHeight: 1 };
-const exitoStyle      = { background: "var(--ok-bg)", color: "var(--ok)", border: "1px solid #86efac", borderRadius: "var(--radius)", padding: "10px 16px", fontSize: 13, fontWeight: 500, marginBottom: 16 };
+function Req() { return <span style={{ color: "var(--danger)" }}>*</span>; }

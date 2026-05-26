@@ -1,20 +1,19 @@
 import { useState } from "react";
 import useFetch, { API } from "../hooks/useFetch";
+import DataTable from "../atoms/DataTable";
+import EmptyRow from "../atoms/EmptyRow";
+import StateMsg from "../atoms/StateMsg";
+import PageHeader from "../molecules/PageHeader";
+import Badge from "../atoms/Badge";
+import "../css/Pedidos.css"; 
 
 const ESTADOS = ["PENDIENTE", "EN CAMINO", "RECIBIDO", "CANCELADO"];
 const LINEA_VACIA = { productoId: "", cantidad: 1, precioUnitario: "" };
 
-const ESTADO_STYLE = {
-  PENDIENTE:   "badge badge-warn",
-  "EN CAMINO": "badge badge-info",
-  RECIBIDO:    "badge badge-ok",
-  CANCELADO:   "badge badge-danger",
-};
-
 export default function Pedidos() {
-  const { data: pedidos,    loading, error, refetch } = useFetch("/pedidos");
-  const { data: proveedores }                         = useFetch("/proveedores");
-  const { data: productos }                           = useFetch("/productos");
+  const { data: pedidos,     loading, error, refetch } = useFetch("/pedidos");
+  const { data: proveedores }                          = useFetch("/proveedores");
+  const { data: productos }                            = useFetch("/productos");
 
   const [mostrarForm,   setMostrarForm]   = useState(false);
   const [proveedorId,   setProveedorId]   = useState("");
@@ -25,8 +24,7 @@ export default function Pedidos() {
   const [errorForm,     setErrorForm]     = useState("");
   const [exito,         setExito]         = useState("");
 
-  // ─── Cambiar estado de un pedido existente ────────────────────
-  const [cambiandoEstado, setCambiandoEstado] = useState(null); // id del pedido
+  const [cambiandoEstado, setCambiandoEstado] = useState(null); 
 
   function hoy() {
     return new Date().toISOString().split("T")[0];
@@ -127,32 +125,29 @@ export default function Pedidos() {
     <div className="page-wrapper">
 
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
-        <div>
-          <h1 className="page-title">Pedidos a proveedores</h1>
-          <p className="page-sub">Órdenes de compra registradas</p>
-        </div>
-        <button onClick={abrirForm} style={btnPrimary}>+ Nuevo pedido</button>
+      <div className="page-header-row">
+        <PageHeader title="Pedidos a proveedores" sub="Órdenes de compra registradas" />
+        <button onClick={abrirForm} className="btn-primary">+ Nuevo pedido</button>
       </div>
 
-      {exito && <div style={exitoStyle}>✓ {exito}</div>}
+      {exito && <div className="msg-exito">✓ {exito}</div>}
 
       {/* ── Formulario ── */}
       {mostrarForm && (
-        <div className="card" style={{ borderColor: "var(--accent)", borderWidth: 1.5, marginBottom: 24 }}>
+        <div className="card card-form">
           <div className="card-title">
             Nuevo pedido
-            <button onClick={cerrarForm} style={closeBtn}>×</button>
+            <button type="button" onClick={cerrarForm} className="btn-close">×</button>
           </div>
 
           <form onSubmit={handleSubmit}>
 
             {/* Fila superior */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
+            <div className="form-grid-3">
 
-              <div style={field}>
-                <label style={lbl}>Proveedor <Req /></label>
-                <select value={proveedorId} onChange={e => setProveedorId(e.target.value)} style={inp}>
+              <div className="form-field">
+                <label className="form-label">Proveedor <Req /></label>
+                <select value={proveedorId} onChange={e => setProveedorId(e.target.value)} className="form-input">
                   <option value="">— Seleccionar —</option>
                   {(proveedores ?? []).map(p => (
                     <option key={p.id} value={p.id}>
@@ -162,15 +157,15 @@ export default function Pedidos() {
                 </select>
               </div>
 
-              <div style={field}>
-                <label style={lbl}>Fecha de emisión <Req /></label>
+              <div className="form-field">
+                <label className="form-label">Fecha de emisión <Req /></label>
                 <input type="date" value={fechaEmision}
-                  onChange={e => setFechaEmision(e.target.value)} style={inp} />
+                  onChange={e => setFechaEmision(e.target.value)} className="form-input" />
               </div>
 
-              <div style={field}>
-                <label style={lbl}>Estado inicial</label>
-                <select value={estado} onChange={e => setEstado(e.target.value)} style={inp}>
+              <div className="form-field">
+                <label className="form-label">Estado inicial</label>
+                <select value={estado} onChange={e => setEstado(e.target.value)} className="form-input">
                   {ESTADOS.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
@@ -179,22 +174,22 @@ export default function Pedidos() {
 
             {/* Líneas de productos */}
             <div style={{ marginBottom: 16 }}>
-              <label style={{ ...lbl, display: "block", marginBottom: 10 }}>
+              <label className="form-label" style={{ display: "block", marginBottom: 10 }}>
                 Productos <Req />
               </label>
 
               {/* Cabecera */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 130px 36px", gap: 8, marginBottom: 6 }}>
+              <div className="lineas-header">
                 {["Producto", "Cantidad", "Precio unit.", ""].map((h, i) => (
-                  <span key={i} style={{ fontSize: 11, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</span>
+                  <span key={i} className="lineas-header-item">{h}</span>
                 ))}
               </div>
 
               {lineas.map((l, i) => (
-                <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 100px 130px 36px", gap: 8, marginBottom: 8, alignItems: "center" }}>
+                <div key={i} className="linea-row">
                   <select value={l.productoId}
                     onChange={e => handleLineaChange(i, "productoId", e.target.value)}
-                    style={inp}>
+                    className="form-input">
                     <option value="">— Seleccionar —</option>
                     {(productos ?? []).map(p => (
                       <option key={p.id} value={p.id}>{p.nombre}</option>
@@ -203,56 +198,42 @@ export default function Pedidos() {
 
                   <input type="number" min="1" value={l.cantidad}
                     onChange={e => handleLineaChange(i, "cantidad", e.target.value)}
-                    style={inp} placeholder="1" />
+                    className="form-input" placeholder="1" />
 
-                  <div style={{ position: "relative" }}>
-                    <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--muted)", fontSize: 13, pointerEvents: "none" }}>$</span>
+                  <div className="input-precio-wrap">
+                    <span className="input-precio-prefix">$</span>
                     <input type="number" min="0" step="1" value={l.precioUnitario}
                       onChange={e => handleLineaChange(i, "precioUnitario", e.target.value)}
-                      style={{ ...inp, paddingLeft: 22 }} placeholder="0" />
+                      className="form-input form-input-precio" placeholder="0" />
                   </div>
 
                   <button type="button" onClick={() => quitarLinea(i)}
                     disabled={lineas.length === 1}
-                    style={{
-                      background: "none", border: "1px solid var(--border)",
-                      borderRadius: "var(--radius)", width: 36, height: 36,
-                      cursor: lineas.length === 1 ? "not-allowed" : "pointer",
-                      color: lineas.length === 1 ? "var(--muted)" : "var(--danger)",
-                      fontSize: 16, fontWeight: 600,
-                    }}>×</button>
+                    className="btn-quitar">×</button>
                 </div>
               ))}
 
-              <button type="button" onClick={agregarLinea}
-                style={{ ...btnSecondary, marginTop: 4 }}>
+              <button type="button" onClick={agregarLinea} className="btn-secondary" style={{ marginTop: 4 }}>
                 + Agregar producto
               </button>
             </div>
 
             {/* Total */}
-            <div style={{
-              background: "var(--bg)", border: "1px solid var(--border)",
-              borderRadius: "var(--radius)", padding: "12px 16px",
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              marginBottom: 16,
-            }}>
-              <span style={{ fontSize: 13, fontWeight: 500, color: "var(--muted)" }}>Total del pedido</span>
-              <span style={{ fontSize: 22, fontWeight: 700, color: "var(--navy)", fontFamily: "var(--mono)" }}>
-                {fmtPrecio(total)}
-              </span>
+            <div className="total-box">
+              <span className="total-label">Total del pedido</span>
+              <span className="total-valor">{fmtPrecio(total)}</span>
             </div>
 
             {errorForm && (
-              <p style={{ fontSize: 13, color: "var(--danger)", marginBottom: 14 }}>⚠ {errorForm}</p>
+              <p className="msg-error-form">⚠ {errorForm}</p>
             )}
 
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="btn-row">
               <button type="submit" disabled={guardando}
-                style={{ ...btnPrimary, opacity: guardando ? 0.6 : 1 }}>
+                className="btn-primary" style={{ opacity: guardando ? 0.6 : 1 }}>
                 {guardando ? "Creando pedido…" : "Crear pedido"}
               </button>
-              <button type="button" onClick={cerrarForm} style={btnSecondary}>Cancelar</button>
+              <button type="button" onClick={cerrarForm} className="btn-secondary">Cancelar</button>
             </div>
           </form>
         </div>
@@ -262,80 +243,62 @@ export default function Pedidos() {
       <div className="card">
         <div className="card-title">Historial de pedidos</div>
 
-        {loading && <p className="state-msg">Cargando pedidos…</p>}
-        {error   && <p className="state-msg state-error">Error: {error}</p>}
+        <StateMsg loading={loading} error={error} />
 
         {!loading && !error && (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Proveedor</th>
-                  <th>Fecha emisión</th>
-                  <th>Productos</th>
-                  <th>Total</th>
-                  <th>Estado</th>
-                  <th style={{ width: 120, textAlign: "center" }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(pedidos ?? []).length === 0
-                  ? <tr><td colSpan={7} className="state-msg">Sin pedidos registrados</td></tr>
-                  : (pedidos ?? []).map(p => (
-                      <tr key={p.id}>
-                        <td className="td-mono">#{p.id}</td>
-                        <td style={{ fontWeight: 500 }}>
-                          {p.proveedor?.descripcion || p.proveedor?.rutEmpresa || "—"}
-                        </td>
-                        <td className="td-mono">{fmtFecha(p.fechaEmision)}</td>
-                        <td style={{ fontSize: 12, color: "var(--muted)" }}>
-                          {(p.detalles ?? []).length > 0
-                            ? (p.detalles ?? []).map(d =>
-                                `${d.producto?.nombre ?? "?"} ×${d.cantidadSolicitada}`
-                              ).join(", ")
-                            : "—"
-                          }
-                        </td>
-                        <td style={{ fontFamily: "var(--mono)", fontSize: 13, fontWeight: 600 }}>
-                          {fmtPrecio(p.total)}
-                        </td>
-                        <td>
-                          {cambiandoEstado === p.id ? (
-                            <select
-                              defaultValue={p.estado}
-                              autoFocus
-                              onChange={e => handleCambiarEstado(p, e.target.value)}
-                              onBlur={() => setCambiandoEstado(null)}
-                              style={{ ...inp, fontSize: 12, padding: "4px 8px" }}
-                            >
-                              {ESTADOS.map(s => (
-                                <option key={s} value={s}>{s}</option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className={ESTADO_STYLE[p.estado?.toUpperCase()] ?? "badge badge-info"}>
-                              {p.estado ?? "—"}
-                            </span>
-                          )}
-                        </td>
-                        <td>
-                          <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                            <button
-                              onClick={() => setCambiandoEstado(cambiandoEstado === p.id ? null : p.id)}
-                              style={btnEditar}
-                              title="Cambiar estado"
-                            >
-                              {cambiandoEstado === p.id ? "Cancelar" : "Estado"}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                }
-              </tbody>
-            </table>
-          </div>
+          <DataTable headers={["#", "Proveedor", "Fecha emisión", "Productos", "Total", "Estado", "Acciones"]}>
+            {(pedidos ?? []).length === 0
+              ? <EmptyRow cols={7} mensaje="Sin pedidos registrados" />
+              : (pedidos ?? []).map(p => (
+                  <tr key={p.id}>
+                    <td className="td-mono">#{p.id}</td>
+                    <td style={{ fontWeight: 500 }}>
+                      {p.proveedor?.descripcion || p.proveedor?.rutEmpresa || "—"}
+                    </td>
+                    <td className="td-mono">{fmtFecha(p.fechaEmision)}</td>
+                    <td className="td-productos">
+                      {(p.detalles ?? []).length > 0
+                        ? (p.detalles ?? []).map(d =>
+                            `${d.producto?.nombre ?? "?"} ×${d.cantidadSolicitada}`
+                          ).join(", ")
+                        : "—"
+                      }
+                    </td>
+                    <td className="td-total">
+                      {fmtPrecio(p.total)}
+                    </td>
+                    <td>
+                      {cambiandoEstado === p.id ? (
+                        <select
+                          defaultValue={p.estado}
+                          autoFocus
+                          onChange={e => handleCambiarEstado(p, e.target.value)}
+                          onBlur={() => setCambiandoEstado(null)}
+                          className="select-estado-inline"
+                        >
+                          {ESTADOS.map(s => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Badge tipo={p.estado} />
+                      )}
+                    </td>
+                    <td className="td-acciones">
+                      <div className="btn-row" style={{ justifyContent: "center" }}>
+                        <button
+                          onClick={() => setCambiandoEstado(cambiandoEstado === p.id ? null : p.id)}
+                          className="btn-editar"
+                          title="Cambiar estado"
+                        >
+                          {cambiandoEstado === p.id ? "Cancelar" : "Estado"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+            }
+          </DataTable>
         )}
       </div>
     </div>
@@ -343,12 +306,3 @@ export default function Pedidos() {
 }
 
 function Req() { return <span style={{ color: "var(--danger)" }}>*</span>; }
-
-const field        = { display: "flex", flexDirection: "column", gap: 5 };
-const lbl          = { fontSize: 13, fontWeight: 500, color: "var(--text)" };
-const inp          = { padding: "8px 10px", border: "1px solid var(--border)", borderRadius: "var(--radius)", fontSize: 13, fontFamily: "var(--font)", background: "var(--bg)", color: "var(--text)", outline: "none", width: "100%" };
-const btnPrimary   = { padding: "9px 18px", background: "var(--accent)", color: "#fff", border: "none", borderRadius: "var(--radius)", fontSize: 14, fontWeight: 600, fontFamily: "var(--font)", cursor: "pointer" };
-const btnSecondary = { padding: "9px 16px", background: "transparent", color: "var(--muted)", border: "1px solid var(--border)", borderRadius: "var(--radius)", fontSize: 13, fontFamily: "var(--font)", cursor: "pointer" };
-const closeBtn     = { marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "var(--muted)", lineHeight: 1 };
-const exitoStyle   = { background: "var(--ok-bg)", color: "var(--ok)", border: "1px solid #86efac", borderRadius: "var(--radius)", padding: "10px 16px", fontSize: 13, fontWeight: 500, marginBottom: 16 };
-const btnEditar    = { padding: "5px 10px", fontSize: 12, fontWeight: 500, background: "var(--accent-bg)", color: "var(--accent)", border: "1px solid #bfdbfe", borderRadius: "var(--radius)", cursor: "pointer", fontFamily: "var(--font)" };
