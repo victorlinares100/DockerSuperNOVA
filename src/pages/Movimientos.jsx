@@ -1,22 +1,27 @@
-import { useState } from "react";
-import useFetch from "../hooks/useFetch";
+import { useState }  from "react";
+import useFetch      from "../hooks/useFetch";
+import DataTable     from "../atoms/DataTable";
+import EmptyRow      from "../atoms/EmptyRow";
+import StateMsg      from "../atoms/StateMsg";
+import PageHeader    from "../molecules/PageHeader";
+import "../css/Movimientos.css";
 
 const TIPOS = ["ENTRADA", "SALIDA", "VENTA", "AJUSTE"];
 
 const TIPO_STYLE = {
-  ENTRADA: { cls: "badge badge-ok",     icono: "↑" },
-  SALIDA:  { cls: "badge badge-warn",   icono: "↓" },
-  VENTA:   { cls: "badge badge-info",   icono: "🛒" },
-  AJUSTE:  { cls: "badge",              icono: "⚙" },
+  ENTRADA: { cls: "badge badge-ok",   icono: "↑" },
+  SALIDA:  { cls: "badge badge-warn", icono: "↓" },
+  VENTA:   { cls: "badge badge-info", icono: "🛒" },
+  AJUSTE:  { cls: "badge",            icono: "⚙" },
 };
+
+const HEADERS = ["#", "Tipo", "Producto", "Bodega", "Cantidad", "Fecha", "Descripción"];
 
 export default function Movimientos() {
   const { data, loading, error } = useFetch("/movimientosStock");
+  const [filtroTipo, setFiltroTipo] = useState("TODOS");
+  const [busqueda,   setBusqueda]   = useState("");
 
-  const [filtroTipo,  setFiltroTipo]  = useState("TODOS");
-  const [busqueda,    setBusqueda]    = useState("");
-
-  // ─── Filtrar lista ────────────────────────────────────────────
   const lista = (data ?? []).filter(m => {
     const matchTipo = filtroTipo === "TODOS" || m.tipoMovimiento === filtroTipo;
     const matchBusq = !busqueda ||
@@ -25,7 +30,6 @@ export default function Movimientos() {
     return matchTipo && matchBusq;
   });
 
-  // ─── KPIs rápidos ─────────────────────────────────────────────
   const kpis = {
     ENTRADA: (data ?? []).filter(m => m.tipoMovimiento === "ENTRADA").length,
     SALIDA:  (data ?? []).filter(m => m.tipoMovimiento === "SALIDA").length,
@@ -33,64 +37,51 @@ export default function Movimientos() {
     AJUSTE:  (data ?? []).filter(m => m.tipoMovimiento === "AJUSTE").length,
   };
 
-  const fmtFecha = f => f ?? "—";
-
   return (
     <div className="page-wrapper">
-      <h1 className="page-title">Historial de movimientos</h1>
-      <p className="page-sub">Todas las entradas, salidas, ventas y ajustes de stock</p>
+      <PageHeader title="Historial de movimientos" sub="Todas las entradas, salidas, ventas y ajustes de stock" />
 
-      {/* ── KPIs ── */}
+      {/* KPIs */}
       {!loading && (
-        <div className="kpi-grid" style={{ marginBottom: 24 }}>
-          <div className="kpi-card" style={{ borderTopColor: "#16a34a" }}>
+        <div className="kpi-grid">
+          <div className="kpi-card kpi-entradas">
             <div className="kpi-label">↑ Entradas</div>
-            <div className="kpi-value" style={{ color: "#16a34a" }}>{kpis.ENTRADA}</div>
+            <div className="kpi-value kpi-value-entradas">{kpis.ENTRADA}</div>
             <div className="kpi-sub">ingresos de stock</div>
           </div>
-          <div className="kpi-card" style={{ borderTopColor: "#f59e0b" }}>
+          <div className="kpi-card kpi-salidas">
             <div className="kpi-label">↓ Salidas</div>
-            <div className="kpi-value" style={{ color: "#f59e0b" }}>{kpis.SALIDA}</div>
+            <div className="kpi-value kpi-value-salidas">{kpis.SALIDA}</div>
             <div className="kpi-sub">retiros de stock</div>
           </div>
-          <div className="kpi-card" style={{ borderTopColor: "var(--accent)" }}>
+          <div className="kpi-card kpi-ventas">
             <div className="kpi-label">🛒 Ventas</div>
-            <div className="kpi-value" style={{ color: "var(--accent)" }}>{kpis.VENTA}</div>
+            <div className="kpi-value kpi-value-ventas">{kpis.VENTA}</div>
             <div className="kpi-sub">productos vendidos</div>
           </div>
-          <div className="kpi-card" style={{ borderTopColor: "var(--muted)" }}>
+          <div className="kpi-card kpi-ajustes">
             <div className="kpi-label">⚙ Ajustes</div>
-            <div className="kpi-value" style={{ color: "var(--muted)" }}>{kpis.AJUSTE}</div>
+            <div className="kpi-value kpi-value-ajustes">{kpis.AJUSTE}</div>
             <div className="kpi-sub">correcciones manuales</div>
           </div>
         </div>
       )}
 
-      {/* ── Tabla ── */}
+      {/* Tabla */}
       <div className="card">
-        {/* Toolbar */}
-        <div className="toolbar" style={{ marginBottom: 16 }}>
+        <div className="toolbar">
           <input
             className="search"
             placeholder="Buscar por producto o descripción…"
             value={busqueda}
             onChange={e => setBusqueda(e.target.value)}
           />
-          {/* Filtro por tipo */}
-          <div style={{ display: "flex", gap: 6 }}>
+          <div className="filtros-wrap">
             {["TODOS", ...TIPOS].map(t => (
               <button
                 key={t}
                 onClick={() => setFiltroTipo(t)}
-                style={{
-                  padding: "6px 12px", fontSize: 12, fontWeight: 500,
-                  borderRadius: "var(--radius)", cursor: "pointer",
-                  fontFamily: "var(--font)",
-                  background: filtroTipo === t ? "var(--navy)" : "transparent",
-                  color:      filtroTipo === t ? "#fff" : "var(--muted)",
-                  border:     filtroTipo === t ? "1px solid var(--navy)" : "1px solid var(--border)",
-                  transition: "all .15s",
-                }}
+                className={`filtro-btn${filtroTipo === t ? " activo" : ""}`}
               >
                 {t === "TODOS" ? "Todos" : t.charAt(0) + t.slice(1).toLowerCase()}
               </button>
@@ -98,77 +89,44 @@ export default function Movimientos() {
           </div>
         </div>
 
-        {loading && <p className="state-msg">Cargando movimientos…</p>}
-        {error   && <p className="state-msg state-error">Error: {error}</p>}
+        <StateMsg loading={loading} error={error} />
 
         {!loading && !error && (
           <>
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Tipo</th>
-                    <th>Producto</th>
-                    <th>Bodega</th>
-                    <th>Cantidad</th>
-                    <th>Fecha</th>
-                    <th>Descripción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lista.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="state-msg">
-                        {data?.length === 0
-                          ? "Sin movimientos registrados aún"
-                          : "Sin resultados para el filtro aplicado"}
-                      </td>
-                    </tr>
-                  ) : (
-                    // Ordenar del más reciente al más antiguo
-                    [...lista].reverse().map(m => {
-                      const tipo   = m.tipoMovimiento?.toUpperCase();
-                      const estilo = TIPO_STYLE[tipo] ?? { cls: "badge", icono: "—" };
-                      const esPositivo = tipo === "ENTRADA";
-                      const esNegativo = tipo === "SALIDA" || tipo === "VENTA";
+            <DataTable headers={HEADERS}>
+              {lista.length === 0
+                ? <EmptyRow cols={7} mensaje={
+                    data?.length === 0
+                      ? "Sin movimientos registrados aún"
+                      : "Sin resultados para el filtro aplicado"
+                  } />
+                : [...lista].reverse().map(m => {
+                    const tipo    = m.tipoMovimiento?.toUpperCase();
+                    const estilo  = TIPO_STYLE[tipo] ?? { cls: "badge", icono: "—" };
+                    const clsCant = tipo === "ENTRADA" ? "cantidad-positivo"
+                                  : tipo === "SALIDA" || tipo === "VENTA" ? "cantidad-negativo"
+                                  : "cantidad-neutral";
+                    const prefijo = tipo === "ENTRADA" ? "+" : (tipo === "SALIDA" || tipo === "VENTA") ? "-" : "";
 
-                      return (
-                        <tr key={m.id}>
-                          <td className="td-mono">#{m.id}</td>
-                          <td>
-                            <span className={estilo.cls}>
-                              {estilo.icono} {tipo
-                                ? tipo.charAt(0) + tipo.slice(1).toLowerCase()
-                                : "—"}
-                            </span>
-                          </td>
-                          <td style={{ fontWeight: 500 }}>
-                            {m.stock?.producto?.nombre || "—"}
-                          </td>
-                          <td style={{ color: "var(--muted)", fontSize: 13 }}>
-                            {m.stock?.bodega?.sucursal || "—"}
-                          </td>
-                          <td>
-                            <span style={{
-                              fontFamily: "var(--mono)", fontSize: 13, fontWeight: 600,
-                              color: esPositivo ? "#16a34a" : esNegativo ? "#ef4444" : "var(--text)",
-                            }}>
-                              {esPositivo ? "+" : esNegativo ? "-" : ""}{m.cantidad ?? 0}
-                            </span>
-                          </td>
-                          <td className="td-mono">{fmtFecha(m.fechaMovimiento)}</td>
-                          <td style={{ color: "var(--muted)", fontSize: 13, maxWidth: 200 }}>
-                            {m.descripcion || "—"}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div style={{ marginTop: 10, fontSize: 12, color: "var(--muted)", textAlign: "right" }}>
+                    return (
+                      <tr key={m.id}>
+                        <td className="td-mono">#{m.id}</td>
+                        <td>
+                          <span className={estilo.cls}>
+                            {estilo.icono} {tipo ? tipo.charAt(0) + tipo.slice(1).toLowerCase() : "—"}
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: 500 }}>{m.stock?.producto?.nombre || "—"}</td>
+                        <td className="td-muted">{m.stock?.bodega?.sucursal || "—"}</td>
+                        <td><span className={clsCant}>{prefijo}{m.cantidad ?? 0}</span></td>
+                        <td className="td-mono">{m.fechaMovimiento ?? "—"}</td>
+                        <td className="td-muted-wrap">{m.descripcion || "—"}</td>
+                      </tr>
+                    );
+                  })
+              }
+            </DataTable>
+            <div className="mov-contador">
               {lista.length} movimiento{lista.length !== 1 ? "s" : ""}
               {filtroTipo !== "TODOS" && ` · filtro: ${filtroTipo}`}
             </div>

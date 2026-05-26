@@ -1,0 +1,49 @@
+/* ── KPIs ────────────────────────────────────────────────────── */
+.kpi-entradas  { border-top-color: #16a34a; }
+.kpi-salidas   { border-top-color: #f59e0b; }
+.kpi-ventas    { border-top-color: var(--accent); }
+.kpi-ajustes   { border-top-color: var(--muted); }
+
+.kpi-value-entradas { color: #16a34a; }
+.kpi-value-salidas  { color: #f59e0b; }
+.kpi-value-ventas   { color: var(--accent); }
+.kpi-value-ajustes  { color: var(--muted); }
+
+/* ── Filtros de tipo ─────────────────────────────────────────── */
+.filtros-wrap { display: flex; gap: 6px; }
+
+.filtro-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font);
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  transition: all .15s;
+}
+
+.filtro-btn.activo {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+/* ── Cantidad con color ───────────────────────────────────────── */
+.cantidad-positivo { font-family: var(--mono); font-size: 13px; font-weight: 600; color: #16a34a; }
+.cantidad-negativo { font-family: var(--mono); font-size: 13px; font-weight: 600; color: #ef4444; }
+.cantidad-neutral  { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text); }
+
+/* ── Celda muted pequeña ─────────────────────────────────────── */
+.td-muted { color: var(--muted); font-size: 13px; }
+.td-muted-wrap { color: var(--muted); font-size: 13px; max-width: 200px; }
+
+/* ── Contador inferior ───────────────────────────────────────── */
+.mov-contador {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+}
