@@ -4,7 +4,19 @@ import DataTable from "../atoms/DataTable";
 import EmptyRow from "../atoms/EmptyRow";
 import StateMsg from "../atoms/StateMsg";
 import PageHeader from "../molecules/PageHeader";
+import * as XLSX from "xlsx";
 import "../css/Stock.css";
+
+function exportarExcel(datos, nombreArchivo) {
+  if (!datos || datos.length === 0) {
+    alert("No hay datos para exportar");
+    return;
+  }
+  const hoja    = XLSX.utils.json_to_sheet(datos);
+  const libro   = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, "Datos");
+  XLSX.writeFile(libro, nombreArchivo + ".xlsx");
+}
 
 const FORM_VACIO = {
   producto:           { id: "" },
@@ -105,9 +117,21 @@ export default function Stock() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
         <PageHeader title="Stock" sub="Inventario por producto y bodega" />
-        <button onClick={abrirForm} className="btn-primary">
-          + Registrar stock
-        </button>
+        
+        {/* Agrupamos los botones arriba a la derecha */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button 
+            onClick={() => exportarExcel(lista, "inventario_stock")} 
+            className="btn-secondary"
+            style={{ padding: "8px 16px", cursor: "pointer" }}
+          >
+            Exportar Excel
+          </button>
+          
+          <button onClick={abrirForm} className="btn-primary">
+            + Registrar stock
+          </button>
+        </div>
       </div>
 
       {/* Éxito */}
@@ -144,7 +168,7 @@ export default function Stock() {
                 <label className="form-label">
                   Bodega <Req />
                 </label>
-                <select name="bodegaId" value={form.bodega.id} onChange={handleChange} className="form-input">
+                <select name="bodygaId" value={form.bodega.id} onChange={handleChange} className="form-input">
                   <option value="">— Seleccionar —</option>
                   {(bodegas ?? []).map(b => (
                     <option key={b.id} value={b.id}>{b.sucursal}</option>
