@@ -1,17 +1,21 @@
 import "../css/Inicio.css";
-import useFetch  from "../hooks/useFetch";
-import DataTable from "../atoms/DataTable";
-import EmptyRow  from "../atoms/EmptyRow";
+import useFetch       from "../hooks/useFetch";
+import DataTable      from "../atoms/DataTable";
+import EmptyRow       from "../atoms/EmptyRow";
+import GraficoStock   from "../components/GraficoStock";
 
 export default function Inicio() {
   const { data: productos }  = useFetch("/productos");
   const { data: proveedores} = useFetch("/proveedores");
   const { data: bodegas }    = useFetch("/bodegas");
   const { data: pedidos }    = useFetch("/pedidos");
+  const { data: stocks }     = useFetch("/stocks");
 
   const pendientes = (pedidos ?? []).filter(
     p => p.estado?.toUpperCase() === "PENDIENTE"
   ).length;
+
+  const ultimos = (productos ?? []).slice(0, 5);
 
   return (
     <>
@@ -25,8 +29,10 @@ export default function Inicio() {
         </div>
       </div>
 
-      {/* KPIs + tabla */}
+      {/* KPIs + contenido */}
       <div className="inicio-body">
+
+        {/* KPIs */}
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Productos</div>
@@ -52,20 +58,29 @@ export default function Inicio() {
           </div>
         </div>
 
+        {/* Gráfico de stock por categoría */}
+        <div className="card" style={{ marginBottom: 24 }}>
+          <GraficoStock stocks={stocks} />
+        </div>
+
+        {/* Tabla últimos productos */}
         <div className="card">
           <div className="card-title">Últimos productos registrados</div>
           <DataTable headers={["Nombre", "Categoría"]}>
             {productos === null
               ? <EmptyRow cols={2} mensaje="Cargando…" />
-              : (productos ?? []).slice(0, 5).map(p => (
-                  <tr key={p.id}>
-                    <td style={{ fontWeight: 500 }}>{p.nombre}</td>
-                    <td>{p.categoria?.Nombre_Categoria || "Sin categoría"}</td>
-                  </tr>
-                ))
+              : ultimos.length === 0
+                ? <EmptyRow cols={2} mensaje="Sin productos registrados" />
+                : ultimos.map(p => (
+                    <tr key={p.id}>
+                      <td style={{ fontWeight: 500 }}>{p.nombre}</td>
+                      <td>{p.categoria?.Nombre_Categoria || "Sin categoría"}</td>
+                    </tr>
+                  ))
             }
           </DataTable>
         </div>
+
       </div>
     </>
   );
