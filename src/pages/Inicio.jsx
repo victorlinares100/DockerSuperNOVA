@@ -1,8 +1,11 @@
+import { useState } from "react"; 
 import "../css/Inicio.css";
 import useFetch       from "../hooks/useFetch";
 import DataTable      from "../atoms/DataTable";
 import EmptyRow       from "../atoms/EmptyRow";
 import GraficoStock   from "../components/GraficoStock";
+import GraficoVentas  from "../components/GraficoVentas"; 
+import GraficoVentasMensual from "../components/GraficoVentasMensual";
 
 export default function Inicio() {
   const { data: productos }  = useFetch("/productos");
@@ -10,7 +13,7 @@ export default function Inicio() {
   const { data: bodegas }    = useFetch("/bodegas");
   const { data: pedidos }    = useFetch("/pedidos");
   const { data: stocks }     = useFetch("/stocks");
-
+  const { data: ventas }     = useFetch("/ventas"); 
   const pendientes = (pedidos ?? []).filter(
     p => p.estado?.toUpperCase() === "PENDIENTE"
   ).length;
@@ -58,9 +61,20 @@ export default function Inicio() {
           </div>
         </div>
 
-        {/* Gráfico de stock por categoría */}
-        <div className="card" style={{ marginBottom: 24 }}>
-          <GraficoStock stocks={stocks} />
+        {}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: 24 }}>
+          
+          
+          {/* Gráfico 1: Ventas mensuales por categoría (BARRAS AGRUPADAS) */}
+          <div className="card">
+            <GraficoVentasMensual ventas={ventas} />
+          </div>
+
+          {/* Gráfico 2: Stock por categoría (BARRAS) */}
+          <div className="card">
+            <GraficoStock stocks={stocks} />
+          </div>
+
         </div>
 
         {/* Tabla últimos productos */}
