@@ -3,8 +3,8 @@ import "../css/Inicio.css";
 import useFetch       from "../hooks/useFetch";
 import DataTable      from "../atoms/DataTable";
 import EmptyRow       from "../atoms/EmptyRow";
-import GraficoStock   from "../components/GraficoStock";
-import GraficoVentas  from "../components/GraficoVentas"; 
+import GraficoStock   from "../components/GraficoStock"; 
+import GraficoTopProductos from "../components/GraficoTopProductos";
 import GraficoVentasMensual from "../components/GraficoVentasMensual";
 
 export default function Inicio() {
@@ -77,24 +77,32 @@ export default function Inicio() {
 
         </div>
 
-        {/* Tabla últimos productos */}
-        <div className="card">
-          <div className="card-title">Últimos productos registrados</div>
-          <DataTable headers={["Nombre", "Categoría"]}>
-            {productos === null
-              ? <EmptyRow cols={2} mensaje="Cargando…" />
-              : ultimos.length === 0
-                ? <EmptyRow cols={2} mensaje="Sin productos registrados" />
-                : ultimos.map(p => (
-                    <tr key={p.id}>
-                      <td style={{ fontWeight: 500 }}>{p.nombre}</td>
-                      <td>{p.categoria?.Nombre_Categoria || "Sin categoría"}</td>
-                    </tr>
-                  ))
-            }
-          </DataTable>
+        {/* ─── FILA 2 DE GRÁFICOS (NUEVA) ─── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: 24 }}>
+          <div className="card">
+            <GraficoTopProductos ventas={ventas} /> {/* ← Agregamos el Top 5 aquí */}
+          </div>
+          
+          {/* Lado Derecho: La Tabla de Últimos Productos (Antes estaba abajo sola) */}
+          <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div className="card-title" style={{ marginBottom: "12px" }}>Últimos productos registrados</div>
+              <DataTable headers={["Nombre", "Categoría"]}>
+                {productos === null
+                  ? <EmptyRow cols={2} mensaje="Cargando…" />
+                  : ultimos.length === 0
+                    ? <EmptyRow cols={2} mensaje="Sin productos registrados" />
+                    : ultimos.map(p => (
+                        <tr key={p.id}>
+                          <td style={{ fontWeight: 500, padding: "8px 12px" }}>{p.nombre}</td>
+                          <td style={{ padding: "8px 12px" }}>{p.categoria?.Nombre_Categoria || "Sin categoría"}</td>
+                        </tr>
+                      ))
+                }
+              </DataTable>
+            </div>
+          </div>
         </div>
-
       </div>
     </>
   );
