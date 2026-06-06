@@ -5,20 +5,23 @@ import "../css/Cliente.css";
 // ─── Helpers ──────────────────────────────────────────────────
 const fmtPrecio = n => n != null ? `$${Number(n).toLocaleString("es-CL")}` : "—";
 
-const iconoPorCategoria = cat => {
+const imagenPorCategoria = cat => {
   const mapa = {
-    "Lácteos":           "🥛",
-    "Bebidas":           "🥤",
-    "Panadería":         "🍞",
-    "Carnes y Embutidos":"🥩",
-    "Frutas y Verduras": "🥦",
-    "Aseo del Hogar":    "🧹",
-    "Higiene Personal":  "🧴",
-    "Congelados":        "🧊",
-    "Snacks y Dulces":   "🍫",
-    "Condimentos y Salsas":"🫙",
+    "Lácteos":             "/imagenes/Lacteos.webp",
+    "Bebidas":             "/imagenes/Bebidas.webp",
+    "Panadería":           "/imagenes/Panaderia.webp",
+    "Carnes y Embutidos":  "/imagenes/Carnes.webp",
+    "Frutas y Verduras":   "/imagenes/Frutas.webp",
+    "Aseo del Hogar":      "/imagenes/Limpieza.webp",
+    "Higiene Personal":    "/imagenes/Higiene.webp",
+    "Congelados":          "/imagenes/Helados.webp", 
+    "Snacks y Dulces":     "/imagenes/Snack.webp",
+    "Condimentos y Salsas":"/imagenes/Salsas.webp",
   };
-  return mapa[cat] ?? "📦";
+  
+  const url = mapa[cat] ?? "/imagenes/Panaderia.webp"; 
+  
+  return <img src={url} alt={cat || "Producto"} className="cli-cat-img" />;
 };
 
 const badgeStock = cantidad => {
@@ -194,7 +197,7 @@ export default function Cliente() {
             return (
               <div key={p.id} className="cli-prod-card">
                 <div className="cli-prod-icon">
-                  {iconoPorCategoria(p.categoria?.Nombre_Categoria)}
+                  {imagenPorCategoria(p.categoria?.Nombre_Categoria)}
                 </div>
                 <div className="cli-prod-nombre">{p.nombre}</div>
                 <div className="cli-prod-cat">{p.categoria?.Nombre_Categoria || "—"}</div>
@@ -250,7 +253,7 @@ export default function Cliente() {
             style={{ border: 0, display: "block" }}
             loading="lazy"
             allowFullScreen
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3326.0!2d-70.6127!3d-33.5678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662d0677c7d2355%3A0xa7aef48469ddd461!2sDuoc%20UC%20Plaza%20Vespucio!5e0!3m2!1ses!2scl!4v1700000000000"
+            src="https://maps.google.com/maps?q=Santiago,Chile&t=&z=13&ie=UTF8&iwloc=&output=embed"
           />
         </div>
       </section>

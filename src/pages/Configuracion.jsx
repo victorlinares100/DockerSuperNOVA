@@ -6,9 +6,9 @@ import DataTable  from "../atoms/DataTable";
 import EmptyRow   from "../atoms/EmptyRow";
 
 const TABS = [
-  { id: "categorias",  label: "Categorías",  icono: "🏷️"  },
-  { id: "proveedores", label: "Proveedores", icono: "🚚" },
-  { id: "bodegas",     label: "Bodegas",     icono: "🏪" },
+  { id: "categorias",  label: "Categorías"  },
+  { id: "proveedores", label: "Proveedores" },
+  { id: "bodegas",     label: "Bodegas" },
 ];
 
 // ─── Categorías ───────────────────────────────────────────────
