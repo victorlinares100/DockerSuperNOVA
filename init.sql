@@ -105,3 +105,15 @@ CREATE TABLE Detalle_Venta (
     FOREIGN KEY (Producto_id) REFERENCES Producto(producto_id)
 );
 
+-- ─── TABLA SOLICITUDES CLIENTES ───────────────────────────────────────────────
+
+CREATE TABLE Solicitud (
+    Solicitud_id   INT AUTO_INCREMENT PRIMARY KEY,
+    nombre         VARCHAR(100) NOT NULL,
+    email          VARCHAR(100) NOT NULL,
+    telefono       VARCHAR(20),
+    mensaje        TEXT         NOT NULL,
+    tipo           ENUM('CONSULTA','RECLAMO','SUGERENCIA') NOT NULL DEFAULT 'CONSULTA',
+    fecha_solicitud DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado         ENUM('PENDIENTE','REVISADA','RESUELTA') NOT NULL DEFAULT 'PENDIENTE'
+);

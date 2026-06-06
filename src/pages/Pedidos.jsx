@@ -8,7 +8,7 @@ import Badge from "../atoms/Badge";
 import "../css/Pedidos.css"; 
 
 const ESTADOS = ["PENDIENTE", "EN CAMINO", "RECIBIDO", "CANCELADO"];
-const LINEA_VACIA = { productoId: "", cantidad: 1, precioUnitario: "" };
+const LINEA_VACIA = { productoId: "", cantidad: 1, precioUnitario:  "" };
 
 export default function Pedidos() {
   const { data: pedidos,     loading, error, refetch } = useFetch("/pedidos");
@@ -39,12 +39,21 @@ export default function Pedidos() {
   }
 
   function handleLineaChange(i, campo, valor) {
-    setLineas(prev => {
-      const next = [...prev];
+  setLineas(prev => {
+    const next = [...prev];
+    if (campo === "productoId") {
+      const prod = (productos ?? []).find(p => String(p.id) === String(valor));
+      next[i] = {
+        ...next[i],
+        productoId:     valor,
+        precioUnitario: prod?.precioVenta != null ? String(prod.precioVenta) : "",
+      };
+    } else {
       next[i] = { ...next[i], [campo]: valor };
-      return next;
-    });
-  }
+    }
+    return next;
+  });
+}
 
   function agregarLinea() { setLineas(p => [...p, { ...LINEA_VACIA }]); }
   function quitarLinea(i) { setLineas(p => p.filter((_, idx) => idx !== i)); }
@@ -143,7 +152,7 @@ export default function Pedidos() {
           <form onSubmit={handleSubmit}>
 
             {/* Fila superior */}
-            <div className="form-grid-3">
+            <div className="form-grid-2">
 
               <div className="form-field">
                 <label className="form-label">Proveedor <Req /></label>
@@ -163,12 +172,7 @@ export default function Pedidos() {
                   onChange={e => setFechaEmision(e.target.value)} className="form-input" />
               </div>
 
-              <div className="form-field">
-                <label className="form-label">Estado inicial</label>
-                <select value={estado} onChange={e => setEstado(e.target.value)} className="form-input">
-                  {ESTADOS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
+              
 
             </div>
 
@@ -180,7 +184,7 @@ export default function Pedidos() {
 
               {/* Cabecera */}
               <div className="lineas-header">
-                {["Producto", "Cantidad", "Precio unit.", ""].map((h, i) => (
+                {["Producto", "Cantidad", "Precio unit. (autocompletado)", ""].map((h, i) => (
                   <span key={i} className="lineas-header-item">{h}</span>
                 ))}
               </div>

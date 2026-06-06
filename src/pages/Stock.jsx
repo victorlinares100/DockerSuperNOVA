@@ -168,7 +168,7 @@ export default function Stock() {
                 <label className="form-label">
                   Bodega <Req />
                 </label>
-                <select name="bodygaId" value={form.bodega.id} onChange={handleChange} className="form-input">
+                <select name="bodegaId" value={form.bodega.id} onChange={handleChange} className="form-input">
                   <option value="">— Seleccionar —</option>
                   {(bodegas ?? []).map(b => (
                     <option key={b.id} value={b.id}>{b.sucursal}</option>
