@@ -244,7 +244,7 @@ export default function Cliente() {
             </div>
           ))}
         </div>
-        {/* Mapa embebido de Santiago */}
+        {/* Mapa embebido de duoc */}
         <div className="cli-mapa-embed">
           <iframe
             title="Ubicación SuperNOVA"
@@ -253,7 +253,7 @@ export default function Cliente() {
             style={{ border: 0, display: "block" }}
             loading="lazy"
             allowFullScreen
-            src="https://maps.google.com/maps?q=Santiago,Chile&t=&z=13&ie=UTF8&iwloc=&output=embed"
+            src="https://maps.google.com/maps?q=Froilán+Roa+7107,+La+Florida,+Región+Metropolitana&output=embed"
           />
         </div>
       </section>
