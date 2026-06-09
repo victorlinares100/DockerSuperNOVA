@@ -95,7 +95,7 @@ export default function Inicio() {
                     : ultimos.map(p => (
                         <tr key={p.id}>
                           <td style={{ fontWeight: 500, padding: "8px 12px" }}>{p.nombre}</td>
-                          <td style={{ padding: "8px 12px" }}>{p.categoria?.Nombre_Categoria || "Sin categoría"}</td>
+                          <td style={{ padding: "8px 12px" }}>{p.categoria?.nombre_Categoria || "Sin categoría"}</td>
                         </tr>
                       ))
                 }

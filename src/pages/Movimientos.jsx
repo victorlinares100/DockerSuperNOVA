@@ -19,14 +19,25 @@ const HEADERS = ["#", "Tipo", "Producto", "Bodega", "Cantidad", "Fecha", "Descri
 
 export default function Movimientos() {
   const { data, loading, error } = useFetch("/movimientosStock");
+  const { data: bodegas }        = useFetch("/bodegas");
+
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
   const [busqueda,   setBusqueda]   = useState("");
 
+  const getBodegaName = (id) => {
+    const b = (bodegas ?? []).find(x => String(x.id) === String(id));
+    return b ? b.sucursal : "—";
+  };
+
   const lista = (data ?? []).filter(m => {
     const matchTipo = filtroTipo === "TODOS" || m.tipoMovimiento === filtroTipo;
+    const nombreBodega = getBodegaName(m.stock?.bodegaId);
+    
     const matchBusq = !busqueda ||
       m.stock?.producto?.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      m.descripcion?.toLowerCase().includes(busqueda.toLowerCase());
+      m.descripcion?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      nombreBodega.toLowerCase().includes(busqueda.toLowerCase());
+      
     return matchTipo && matchBusq;
   });
 
@@ -41,7 +52,6 @@ export default function Movimientos() {
     <div className="page-wrapper">
       <PageHeader title="Historial de movimientos" sub="Todas las entradas, salidas, ventas y ajustes de stock" />
 
-      {/* KPIs */}
       {!loading && (
         <div className="kpi-grid">
           <div className="kpi-card kpi-entradas">
@@ -67,7 +77,6 @@ export default function Movimientos() {
         </div>
       )}
 
-      {/* Tabla */}
       <div className="card">
         <div className="toolbar">
           <input
@@ -117,7 +126,7 @@ export default function Movimientos() {
                           </span>
                         </td>
                         <td style={{ fontWeight: 500 }}>{m.stock?.producto?.nombre || "—"}</td>
-                        <td className="td-muted">{m.stock?.bodega?.sucursal || "—"}</td>
+                        <td className="td-muted">{getBodegaName(m.stock?.bodegaId)}</td>
                         <td><span className={clsCant}>{prefijo}{m.cantidad ?? 0}</span></td>
                         <td className="td-mono">{m.fechaMovimiento ?? "—"}</td>
                         <td className="td-muted-wrap">{m.descripcion || "—"}</td>

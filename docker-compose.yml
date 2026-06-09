@@ -5,7 +5,7 @@ services:
     image: mariadb:latest
     environment:
       MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: microservicio_productos
+      MARIADB_DATABASE: microservicio_inventario
     ports:
       - "3307:3306"
     volumes:

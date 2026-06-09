@@ -23,7 +23,7 @@ export default function GraficoStock({ stocks }) {
     // ── Agrupar stock por categoría ──────────────────────────────
     const porCategoria = {};
     stocks.forEach(s => {
-      const cat  = s.producto?.categoria?.Nombre_Categoria ?? "Sin categoría";
+      const cat  = s.producto?.categoria?.nombre_Categoria ?? "Sin categoría";
       const cant = s.cantidadDisponible ?? 0;
       porCategoria[cat] = (porCategoria[cat] ?? 0) + cant;
     });

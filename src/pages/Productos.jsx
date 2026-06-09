@@ -225,7 +225,7 @@ export default function Productos() {
                   return (
                     <tr key={p.id}>
                       <td style={{ fontWeight: 500 }}>{p.nombre}</td>
-                      <td>{p.categoria?.Nombre_Categoria || "—"}</td>
+                      <td>{p.categoria?.nombre_Categoria || "—"}</td>
                       <td className="td-precio">
                         {fmtPrecio(p.precioVenta)}
                       </td>

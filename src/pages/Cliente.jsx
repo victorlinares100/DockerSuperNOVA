@@ -61,7 +61,8 @@ function FormularioContacto() {
 
     setEnviando(true);
     try {
-      const res = await fetch(`${API}/solicitudes`, {
+      // 🌟 Cambio integrado: Apuntando explícitamente al puerto 8082 del microservicio ms-cliente
+      const res = await fetch("http://localhost:8082/api/v1/solicitudes", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(form),
@@ -200,7 +201,7 @@ export default function Cliente() {
                   {imagenPorCategoria(p.categoria?.Nombre_Categoria)}
                 </div>
                 <div className="cli-prod-nombre">{p.nombre}</div>
-                <div className="cli-prod-cat">{p.categoria?.Nombre_Categoria || "—"}</div>
+                <div className="cli-prod-cat">{p.categoria?.nombre_Categoria || "—"}</div>
                 <div className="cli-prod-precio">{fmtPrecio(p.precioVenta)}</div>
                 {badgeStock(cant)}
               </div>

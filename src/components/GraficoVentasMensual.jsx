@@ -41,7 +41,7 @@ export default function GraficoVentasMensual({ ventas }) {
       // Recorrer los detalles para sumar por categoría
       v.detalles.forEach(detalle => {
         // En tu backend la propiedad suele llamarse Nombre_Categoria o nombre
-        const catName = detalle.producto?.categoria?.Nombre_Categoria 
+        const catName = detalle.producto?.categoria?.nombre_Categoria 
                      || detalle.producto?.categoria?.nombre 
                      || "Sin Categoría";
         

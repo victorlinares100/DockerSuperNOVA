@@ -6,13 +6,13 @@ import DataTable from "../atoms/DataTable";
 import EmptyRow from "../atoms/EmptyRow";
 import "../css/Ventas.css"; 
 
-// NUEVO: Añadimos bodegaId a la línea vacía
 const LINEA_VACIA = { productoId: "", bodegaId: "", nombre: "", cantidad: 1, precioUnitario: "" };
 
 export default function Ventas() {
   const { data: ventas,   loading, error, refetch } = useFetch("/ventas");
   const { data: productos }                         = useFetch("/productos");
   const { data: stocks }                            = useFetch("/stocks");
+  const { data: bodegas }                           = useFetch("/bodegas");
 
   const [mostrarForm, setMostrarForm] = useState(false);
   const [lineas,      setLineas]      = useState([{ ...LINEA_VACIA }]);
@@ -20,14 +20,18 @@ export default function Ventas() {
   const [errorForm,   setErrorForm]   = useState("");
   const [exito,       setExito]       = useState(false);
 
-  // ─── Obtener bodegas que tienen stock de un producto ──────────
+  const getBodegaName = (id) => {
+    const b = (bodegas ?? []).find(x => String(x.id) === String(id));
+    return b ? b.sucursal : "—";
+  };
+
   function bodegasConStock(productoId) {
     if (!stocks || !productoId) return [];
     return (stocks ?? [])
       .filter(s => String(s.producto?.id) === String(productoId) && (s.cantidadDisponible ?? 0) > 0)
       .map(s => ({
-        id:       s.bodega?.id,
-        sucursal: s.bodega?.sucursal,
+        id:       s.bodegaId, 
+        sucursal: getBodegaName(s.bodegaId),
         cantidad: s.cantidadDisponible,
       }));
   }
@@ -47,7 +51,7 @@ export default function Ventas() {
         next[i] = {
           ...next[i],
           productoId:     valor,
-          bodegaId:       "", // Resetear la bodega si se cambia el producto
+          bodegaId:       "", 
           nombre:         prod?.nombre ?? "",
           precioUnitario: prod?.precioVenta != null ? String(prod.precioVenta) : "",
         };
@@ -79,11 +83,10 @@ export default function Ventas() {
       }
     }
 
-    // NUEVO: La bodega ahora va en los detalles, no en la raíz del body
     const body = {
       detalles: lineas.map(l => ({
         producto:       { id: Number(l.productoId) },
-        bodega:         { id: Number(l.bodegaId) },
+        bodegaId:       Number(l.bodegaId), 
         cantidad:       Number(l.cantidad),
         precioUnitario: Number(l.precioUnitario),
       })),
@@ -128,7 +131,6 @@ export default function Ventas() {
         <div className="msg-exito">✓ Venta registrada. Stock descontado correctamente.</div>
       )}
 
-      {/* ── Formulario ── */}
       {mostrarForm && (
         <div className="card card-form">
           <div className="card-title">
@@ -142,7 +144,6 @@ export default function Ventas() {
                 Productos y Bodegas <Req />
               </label>
 
-              {/* Cabecera actualizada con Bodega */}
               <div className="line-grid line-header" style={{ gridTemplateColumns: "2fr 2fr 1fr 1fr 40px" }}>
                 {["Producto", "Bodega Origen", "Cant.", "Precio unit.", ""].map((h, i) => (
                   <span key={i}>{h}</span>
@@ -152,7 +153,6 @@ export default function Ventas() {
               {lineas.map((l, i) => (
                 <div key={i} className="line-grid" style={{ gridTemplateColumns: "2fr 2fr 1fr 1fr 40px" }}>
                   
-                  {/* Selector de Producto */}
                   <select 
                     value={l.productoId}
                     onChange={e => handleLineaChange(i, "productoId", e.target.value)}
@@ -164,7 +164,6 @@ export default function Ventas() {
                     ))}
                   </select>
 
-                  {/* NUEVO: Selector de Bodega Específico para este producto */}
                   <select 
                     value={l.bodegaId}
                     onChange={e => handleLineaChange(i, "bodegaId", e.target.value)}
@@ -231,13 +230,11 @@ export default function Ventas() {
         </div>
       )}
 
-      {/* ── Tabla historial ── */}
       <div className="card">
         <div className="card-title">Historial de ventas</div>
         <StateMsg loading={loading} error={error} />
         
         {!loading && !error && (
-          // Ocultamos la columna global de bodega en la tabla, ya que ahora cada detalle tiene la suya
           <DataTable headers={["#", "Fecha", "Detalle de Productos", "Total"]}>
             {(ventas ?? []).length === 0
               ? <EmptyRow cols={4} mensaje="Sin ventas registradas" />
@@ -246,9 +243,8 @@ export default function Ventas() {
                     <td className="td-mono">#{v.id}</td>
                     <td className="td-mono td-date">{fmtFecha(v.fechaVenta)}</td>
                     <td className="td-details">
-                      {/* Aquí mostramos de qué bodega salió cada producto */}
                       {(v.detalles ?? []).map(d =>
-                        `${d.producto?.nombre ?? "?"} ×${d.cantidad} (${d.bodega?.sucursal ?? "?"})`
+                        `${d.producto?.nombre ?? "?"} ×${d.cantidad} (${getBodegaName(d.bodegaId)})`
                       ).join(" | ") || "—"}
                     </td>
                     <td className="td-total">

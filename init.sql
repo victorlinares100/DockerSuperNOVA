@@ -1,11 +1,13 @@
-CREATE DATABASE IF NOT EXISTS microservicio_productos;
-USE microservicio_productos;
+CREATE DATABASE IF NOT EXISTS microservicio_inventario;
+CREATE DATABASE IF NOT EXISTS microservicio_clientes;
+
+USE microservicio_inventario;
 
 -- ─── TABLAS BASE ──────────────────────────────────────────────────────────────
 
 CREATE TABLE Categoria (
     Categoria_id INT AUTO_INCREMENT PRIMARY KEY,
-    Nombre_Categoria VARCHAR(100)
+    nombre_Categoria VARCHAR(100)
 );
 
 CREATE TABLE Proveedor (
