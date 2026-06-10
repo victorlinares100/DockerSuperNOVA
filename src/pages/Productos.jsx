@@ -4,7 +4,20 @@ import DataTable from "../atoms/DataTable";
 import EmptyRow from "../atoms/EmptyRow";
 import StateMsg from "../atoms/StateMsg";
 import PageHeader from "../molecules/PageHeader";
+import * as XLSX from "xlsx"; // ← 1. Importación de XLSX añadida
 import "../css/Productos.css"; 
+
+// ← 2. Función auxiliar de exportación añadida
+function exportarExcel(datos, nombreArchivo) {
+  if (!datos || datos.length === 0) {
+    alert("No hay datos para exportar");
+    return;
+  }
+  const hoja  = XLSX.utils.json_to_sheet(datos);
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, "Productos");
+  XLSX.writeFile(libro, nombreArchivo + ".xlsx");
+}
 
 const FORM_VACIO = {
   nombre:         "",
@@ -51,7 +64,6 @@ export default function Productos() {
     setMostrarForm(true); setErrorForm(""); setExito("");
   }
 
-  // ← función restaurada
   function abrirEditar(p) {
     setForm({
       id:             p.id,
@@ -111,9 +123,45 @@ export default function Productos() {
   return (
     <div className="page-wrapper">
 
+      {/* ── Header con botón de Excel integrado ── */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
         <PageHeader title="Productos" sub="Catálogo completo — stock en tiempo real" />
-        <button onClick={abrirCrear} className="btn-primary">+ Nuevo producto</button>
+        
+        <div style={{ display: "flex", gap: "10px" }}>
+          {/* Botón Exportar Excel añadido */}
+          <button
+            onClick={() => {
+              const datos = lista.map(p => {
+                const stock = stockDeProducto(p.id);
+                
+                // Calculamos dinámicamente el texto de estado para el Excel
+                let estadoTexto = "Sin stock";
+                if (stock !== null) {
+                  if (stock.total <= 0) estadoTexto = "Agotado";
+                  else if (stock.total < stock.minimo) estadoTexto = "Stock bajo";
+                  else estadoTexto = "Normal";
+                }
+
+                return {
+                  "Nombre":           p.nombre || "—",
+                  "Categoría":        p.categoria?.nombre_Categoria || "—",
+                  "Código de Barras": p.codigoDeBarras || "—",
+                  "Precio Venta":     p.precioVenta ?? 0,
+                  "Stock Total":      stock ? stock.total : 0,
+                  "Estado":           estadoTexto,
+                  "Descripción":      p.descripcion || "—"
+                };
+              });
+              exportarExcel(datos, "catalogo_productos");
+            }}
+            className="btn-secondary"
+            style={{ padding: "8px 16px", cursor: "pointer" }}
+          >
+            Exportar Excel
+          </button>
+
+          <button onClick={abrirCrear} className="btn-primary">+ Nuevo producto</button>
+        </div>
       </div>
 
       {exito && <div className="msg-exito">✓ {exito}</div>}
@@ -219,7 +267,6 @@ export default function Productos() {
                         )}
                       </td>
 
-                      {/* ← botón Editar restaurado, sin Eliminar */}
                       <td style={{ width: 80 }}>
                         <button onClick={() => abrirEditar(p)} className="btn-editar">Editar</button>
                       </td>
