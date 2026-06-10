@@ -12,8 +12,8 @@ function exportarExcel(datos, nombreArchivo) {
     alert("No hay datos para exportar");
     return;
   }
-  const hoja    = XLSX.utils.json_to_sheet(datos);
-  const libro   = XLSX.utils.book_new();
+  const hoja  = XLSX.utils.json_to_sheet(datos);
+  const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, hoja, "Datos");
   XLSX.writeFile(libro, nombreArchivo + ".xlsx");
 }
@@ -28,9 +28,9 @@ const FORM_VACIO = {
 };
 
 export default function Stock() {
-  const { data,          loading,  error,   refetch } = useFetch("/stocks");
-  const { data: productos }                           = useFetch("/productos");
-  const { data: bodegas }                             = useFetch("/bodegas");
+  const { data, loading, error, refetch } = useFetch("/stocks");
+  const { data: productos }               = useFetch("/productos");
+  const { data: bodegas }                 = useFetch("/bodegas");
 
   const [mostrarForm, setMostrarForm] = useState(false);
   const [form,        setForm]        = useState(FORM_VACIO);
@@ -39,14 +39,12 @@ export default function Stock() {
   const [exito,       setExito]       = useState(false);
   const [busqueda,    setBusqueda]    = useState("");
 
-  // Cerrar con Escape
   useEffect(() => {
     const fn = e => { if (e.key === "Escape") cerrarForm(); };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
   }, []);
 
-  // Buscador mágico de nombres de bodega
   const getBodegaName = (id) => {
     const b = (bodegas ?? []).find(x => String(x.id) === String(id));
     return b ? b.sucursal : `Bodega ID: ${id}`;
@@ -63,44 +61,35 @@ export default function Stock() {
 
   function handleChange(e) {
     const { name, value } = e.target;
-    if (name === "productoId") {
-      setForm(f => ({ ...f, producto: { id: value } }));
-    } else if (name === "bodegaId") {
-      setForm(f => ({ ...f, bodega: { id: value } }));
-    } else {
-      setForm(f => ({ ...f, [name]: value }));
-    }
+    if      (name === "productoId") setForm(f => ({ ...f, producto: { id: value } }));
+    else if (name === "bodegaId")   setForm(f => ({ ...f, bodega:   { id: value } }));
+    else                            setForm(f => ({ ...f, [name]: value }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setErrorForm("");
-
-    if (!form.producto.id)         { setErrorForm("Selecciona un producto.");          return; }
-    if (!form.bodega.id)           { setErrorForm("Selecciona una bodega.");           return; }
-    if (!form.cantidadDisponible || Number(form.cantidadDisponible) < 0) {
-                                     setErrorForm("Ingresa una cantidad válida.");      return; }
+    if (!form.producto.id)         { setErrorForm("Selecciona un producto.");             return; }
+    if (!form.bodega.id)           { setErrorForm("Selecciona una bodega.");              return; }
+    if (!form.cantidadDisponible || Number(form.cantidadDisponible) < 0)
+                                   { setErrorForm("Ingresa una cantidad válida.");        return; }
     if (!form.fechaIngreso)        { setErrorForm("La fecha de ingreso es obligatoria."); return; }
 
     setGuardando(true);
     try {
       const body = {
         ...form,
-        bodegaId:           Number(form.bodega.id), // <-- Enviamos el ID limpio para Java
+        bodegaId:           Number(form.bodega.id),
         producto:           { id: Number(form.producto.id) },
         cantidadDisponible: Number(form.cantidadDisponible),
         stockMinimo:        Number(form.stockMinimo) || 0,
       };
-      
       const res = await fetch(`${API}/stocks`, {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(body),
+        body: JSON.stringify(body),
       });
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg || `Error ${res.status}`);
-      }
+      if (!res.ok) throw new Error((await res.text()) || `Error ${res.status}`);
       cerrarForm();
       setExito(true);
       setTimeout(() => setExito(false), 3000);
@@ -112,31 +101,44 @@ export default function Stock() {
     }
   }
 
-  // Helpers visuales
   const estadoStock = (cantidad, minimo) => {
     const min = minimo ?? 10;
-    if (cantidad <= 0)     return { cls: "badge badge-danger", txt: "Sin stock" };
-    if (cantidad < min)    return { cls: "badge badge-warn",   txt: "Stock bajo" };
-    return                        { cls: "badge badge-ok",     txt: "Normal" };
+    if (cantidad <= 0)  return { cls: "badge badge-danger", txt: "Sin stock"  };
+    if (cantidad < min) return { cls: "badge badge-warn",   txt: "Stock bajo" };
+    return                     { cls: "badge badge-ok",     txt: "Normal"     };
   };
 
   const fmtFecha = f => f ? new Date(f).toLocaleDateString("es-CL") : "—";
 
   return (
     <div className="page-wrapper">
+
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
         <PageHeader title="Stock" sub="Inventario por producto y bodega" />
-        
         <div style={{ display: "flex", gap: "10px" }}>
-          <button 
-            onClick={() => exportarExcel(lista, "inventario_stock")} 
+
+          <button
+            onClick={() => {
+              const datos = lista.map(s => ({
+                "Producto":           s.producto?.nombre || "—",
+                "Bodega":             getBodegaName(s.bodegaId),
+                "Cantidad":           s.cantidadDisponible ?? 0,
+                "Stock Mínimo":       s.stockMinimo ?? 0,
+                "Estado":             (s.cantidadDisponible ?? 0) <= 0            ? "Sin stock"
+                                    : (s.cantidadDisponible ?? 0) < (s.stockMinimo ?? 10) ? "Stock bajo"
+                                    : "Normal",
+                "Fecha Ingreso":      s.fechaIngreso ?? "—",
+                "Fecha Vencimiento":  s.fechaVencimiento ?? "—",
+              }));
+              exportarExcel(datos, "inventario_stock");
+            }}
             className="btn-secondary"
             style={{ padding: "8px 16px", cursor: "pointer" }}
           >
             Exportar Excel
           </button>
-          
+
           <button onClick={abrirForm} className="btn-primary">
             + Registrar stock
           </button>
@@ -152,7 +154,6 @@ export default function Stock() {
             Registrar stock
             <button onClick={cerrarForm} className="btn-close" title="Cerrar (Esc)">×</button>
           </div>
-
           <form onSubmit={handleSubmit}>
             <div className="form-grid-2">
               <div className="form-field">
@@ -164,7 +165,6 @@ export default function Stock() {
                   ))}
                 </select>
               </div>
-
               <div className="form-field">
                 <label className="form-label">Bodega <Req /></label>
                 <select name="bodegaId" value={form.bodega.id} onChange={handleChange} className="form-input">
@@ -174,61 +174,30 @@ export default function Stock() {
                   ))}
                 </select>
               </div>
-
               <div className="form-field">
                 <label className="form-label">Cantidad <Req /></label>
-                <input
-                  type="number"
-                  name="cantidadDisponible"
-                  value={form.cantidadDisponible}
-                  onChange={handleChange}
-                  min="0"
-                  placeholder="Ej: 50"
-                  className="form-input"
-                  autoFocus
-                />
+                <input type="number" name="cantidadDisponible" value={form.cantidadDisponible}
+                  onChange={handleChange} min="0" placeholder="Ej: 50" className="form-input" autoFocus />
               </div>
-
               <div className="form-field">
                 <label className="form-label">Stock mínimo</label>
-                <input
-                  type="number"
-                  name="stockMinimo"
-                  value={form.stockMinimo}
-                  onChange={handleChange}
-                  min="0"
-                  placeholder="Ej: 10"
-                  className="form-input"
-                />
+                <input type="number" name="stockMinimo" value={form.stockMinimo}
+                  onChange={handleChange} min="0" placeholder="Ej: 10" className="form-input" />
                 <span className="form-hint">Alerta cuando baje de este número</span>
               </div>
-
               <div className="form-field">
                 <label className="form-label">Fecha de ingreso <Req /></label>
-                <input
-                  type="date"
-                  name="fechaIngreso"
-                  value={form.fechaIngreso}
-                  onChange={handleChange}
-                  className="form-input"
-                />
+                <input type="date" name="fechaIngreso" value={form.fechaIngreso}
+                  onChange={handleChange} className="form-input" />
               </div>
-
               <div className="form-field">
                 <label className="form-label">Fecha de vencimiento</label>
-                <input
-                  type="date"
-                  name="fechaVencimiento"
-                  value={form.fechaVencimiento}
-                  onChange={handleChange}
-                  className="form-input"
-                />
+                <input type="date" name="fechaVencimiento" value={form.fechaVencimiento}
+                  onChange={handleChange} className="form-input" />
                 <span className="form-hint">Opcional — dejar vacío si no aplica</span>
               </div>
             </div>
-
             {errorForm && <p className="msg-error-form">⚠ {errorForm}</p>}
-
             <div className="btn-row">
               <button type="submit" disabled={guardando} className="btn-primary">
                 {guardando ? "Guardando…" : "Registrar stock"}
@@ -239,13 +208,9 @@ export default function Stock() {
         </div>
       )}
 
-      {/* ── Banner alertas stock bajo ── */}
+      {/* ── Banner alertas ── */}
       {(() => {
-        const alertas = (data ?? []).filter(s => {
-          const cant = s.cantidadDisponible ?? 0;
-          const min  = s.stockMinimo ?? 10;
-          return cant < min;
-        });
+        const alertas = (data ?? []).filter(s => (s.cantidadDisponible ?? 0) < (s.stockMinimo ?? 10));
         if (alertas.length === 0) return null;
         return (
           <div className="alert-banner">
@@ -256,9 +221,7 @@ export default function Stock() {
               {alertas.map(s => (
                 <span key={s.id} className="alert-tag">
                   {s.producto?.nombre || "—"}
-                  <span className="alert-tag-bold">
-                    {s.cantidadDisponible ?? 0} / {s.stockMinimo ?? 10} mín
-                  </span>
+                  <span className="alert-tag-bold">{s.cantidadDisponible ?? 0} / {s.stockMinimo ?? 10} mín</span>
                 </span>
               ))}
             </div>
@@ -269,19 +232,13 @@ export default function Stock() {
       {/* ── Tabla ── */}
       <div className="card">
         <div className="toolbar">
-          <input
-            className="search"
-            placeholder="Buscar por producto o bodega…"
-            value={busqueda}
-            onChange={e => setBusqueda(e.target.value)}
-          />
+          <input className="search" placeholder="Buscar por producto o bodega…"
+            value={busqueda} onChange={e => setBusqueda(e.target.value)} />
           <span style={{ fontSize: 13, color: "var(--muted)" }}>
             {!loading && `${lista.length} registro${lista.length !== 1 ? "s" : ""}`}
           </span>
         </div>
-
         <StateMsg loading={loading} error={error} />
-
         {!loading && !error && (
           <DataTable headers={["Producto", "Bodega", "Cantidad", "Mínimo", "Estado", "Ingreso", "Vencimiento"]}>
             {lista.length === 0
@@ -290,10 +247,7 @@ export default function Stock() {
                   const { cls, txt } = estadoStock(s.cantidadDisponible ?? s.cantidad_disponible, s.stockMinimo);
                   const vence = s.fechaVencimiento ?? s.fecha_vencimiento;
                   const hoy   = new Date();
-                  const diasVence = vence
-                    ? Math.ceil((new Date(vence) - hoy) / (1000*60*60*24))
-                    : null;
-
+                  const diasVence = vence ? Math.ceil((new Date(vence) - hoy) / (1000*60*60*24)) : null;
                   return (
                     <tr key={s.id}>
                       <td style={{ fontWeight: 500 }}>{s.producto?.nombre || "—"}</td>
@@ -308,9 +262,7 @@ export default function Stock() {
                                         : "#16a34a",
                             }}/>
                           </div>
-                          <span className="stock-text">
-                            {s.cantidadDisponible ?? s.cantidad_disponible ?? 0}
-                          </span>
+                          <span className="stock-text">{s.cantidadDisponible ?? s.cantidad_disponible ?? 0}</span>
                         </div>
                       </td>
                       <td className="td-mono">{s.stockMinimo ?? 10}</td>
