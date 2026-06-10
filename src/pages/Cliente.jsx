@@ -33,10 +33,7 @@ const badgeStock = cantidad => {
 
 // ─── Datos del equipo (estáticos) ─────────────────────────────
 const EQUIPO = [
-  { nombre: "Carlos Mendoza",  cargo: "Gerente General",      inicial: "CM", color: "#2563eb" },
-  { nombre: "Ana Torres",      cargo: "Jefa de Inventario",   inicial: "AT", color: "#16a34a" },
-  { nombre: "Luis Pérez",      cargo: "Encargado de Bodega",  inicial: "LP", color: "#d97706" },
-  { nombre: "María González",  cargo: "Atención al Cliente",  inicial: "MG", color: "#7c3aed" },
+  { nombre: "Victor Linares",  cargo: "Gerente General",      inicial: "CM", color: "#2563eb" },
 ];
 
 // ─── Formulario de contacto ───────────────────────────────────

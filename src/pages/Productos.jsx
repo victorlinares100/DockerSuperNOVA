@@ -26,23 +26,19 @@ export default function Productos() {
   const [guardando,     setGuardando]     = useState(false);
   const [errorForm,     setErrorForm]     = useState("");
   const [exito,         setExito]         = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(null);
-  const [eliminando,    setEliminando]    = useState(false);
 
   useEffect(() => {
-    const fn = e => { if (e.key === "Escape") { cerrarForm(); setConfirmDelete(null); } };
+    const fn = e => { if (e.key === "Escape") { cerrarForm(); } };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
   }, []);
 
-  // ─── Cruzar stock con productos ───────────────────────────────
-  // Para cada producto sumamos todas las unidades en todas las bodegas
   function stockDeProducto(productoId) {
     if (!stocks) return null;
     const registros = stocks.filter(s => s.producto?.id === productoId);
     if (registros.length === 0) return null;
-    const total   = registros.reduce((acc, s) => acc + (s.cantidadDisponible ?? 0), 0);
-    const minimo  = registros.reduce((acc, s) => acc + (s.stockMinimo ?? 0), 0);
+    const total  = registros.reduce((acc, s) => acc + (s.cantidadDisponible ?? 0), 0);
+    const minimo = registros.reduce((acc, s) => acc + (s.stockMinimo ?? 0), 0);
     return { total, minimo, registros: registros.length };
   }
 
@@ -55,6 +51,7 @@ export default function Productos() {
     setMostrarForm(true); setErrorForm(""); setExito("");
   }
 
+  // ← función restaurada
   function abrirEditar(p) {
     setForm({
       id:             p.id,
@@ -109,27 +106,11 @@ export default function Productos() {
     }
   }
 
-  async function handleEliminar() {
-    if (!confirmDelete) return;
-    setEliminando(true);
-    try {
-      const res = await fetch(`${API}/productos/${confirmDelete}`, { method: "DELETE" });
-      if (!res.ok && res.status !== 204) throw new Error(`Error ${res.status}`);
-      setConfirmDelete(null);
-      setExito("Producto eliminado.");
-      setTimeout(() => setExito(""), 3000);
-      refetch();
-    } catch { setConfirmDelete(null); }
-    finally  { setEliminando(false); }
-  }
-
-  const fmtPrecio      = n  => n != null ? `$${Number(n).toLocaleString("es-CL")}` : "—";
-  const nombreEliminar = (data ?? []).find(p => p.id === confirmDelete)?.nombre ?? "";
+  const fmtPrecio = n => n != null ? `$${Number(n).toLocaleString("es-CL")}` : "—";
 
   return (
     <div className="page-wrapper">
 
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
         <PageHeader title="Productos" sub="Catálogo completo — stock en tiempo real" />
         <button onClick={abrirCrear} className="btn-primary">+ Nuevo producto</button>
@@ -137,25 +118,6 @@ export default function Productos() {
 
       {exito && <div className="msg-exito">✓ {exito}</div>}
 
-      {/* ── Modal eliminar ── */}
-      {confirmDelete && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-title">¿Eliminar producto?</div>
-            <p className="modal-text">
-              Vas a eliminar <strong style={{ color: "var(--text)" }}>"{nombreEliminar}"</strong>. Esta acción no se puede deshacer.
-            </p>
-            <div className="btn-row">
-              <button onClick={handleEliminar} disabled={eliminando} className="btn-primary btn-danger">
-                {eliminando ? "Eliminando…" : "Sí, eliminar"}
-              </button>
-              <button onClick={() => setConfirmDelete(null)} className="btn-secondary">Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Formulario ── */}
       {mostrarForm && (
         <div className="card card-form">
           <div className="card-title">
@@ -177,7 +139,7 @@ export default function Productos() {
                 <select className="form-input" name="categoriaId" value={form.categoria.id} onChange={handleChange}>
                   <option value="">— Seleccionar —</option>
                   {(categorias ?? []).map(c => (
-                    <option key={c.id} value={c.id}>{c.Nombre_Categoria}</option>
+                    <option key={c.id} value={c.id}>{c.nombre_Categoria}</option>
                   ))}
                 </select>
               </div>
@@ -204,7 +166,6 @@ export default function Productos() {
         </div>
       )}
 
-      {/* ── Tabla ── */}
       <div className="card">
         <div className="toolbar">
           <input className="search" placeholder="Buscar por nombre…"
@@ -226,11 +187,8 @@ export default function Productos() {
                     <tr key={p.id}>
                       <td style={{ fontWeight: 500 }}>{p.nombre}</td>
                       <td>{p.categoria?.nombre_Categoria || "—"}</td>
-                      <td className="td-precio">
-                        {fmtPrecio(p.precioVenta)}
-                      </td>
+                      <td className="td-precio">{fmtPrecio(p.precioVenta)}</td>
 
-                      {/* Stock con barra visual */}
                       <td>
                         {stock === null ? (
                           <span className="stock-muted">Sin stock</span>
@@ -239,19 +197,16 @@ export default function Productos() {
                             <div className="stock-bar-bg">
                               <div className="stock-bar-fill" style={{
                                 width: Math.min(100, (stock.total / Math.max(stock.minimo * 2, 50)) * 100) + "%",
-                                background: stock.total <= 0        ? "#ef4444"
-                                          : stock.total < stock.minimo ? "#f59e0b"
+                                background: stock.total <= 0             ? "#ef4444"
+                                          : stock.total < stock.minimo   ? "#f59e0b"
                                           : "#16a34a",
                               }} />
                             </div>
-                            <span className="stock-text">
-                              {stock.total}
-                            </span>
+                            <span className="stock-text">{stock.total}</span>
                           </div>
                         )}
                       </td>
 
-                      {/* Badge estado */}
                       <td>
                         {stock === null ? (
                           <span className="badge badge-danger">Sin stock</span>
@@ -264,12 +219,9 @@ export default function Productos() {
                         )}
                       </td>
 
-                      {/* Acciones */}
-                      <td style={{ width: 110 }}>
-                        <div className="btn-row btn-row-center">
-                          <button onClick={() => abrirEditar(p)} className="btn-editar">Editar</button>
-                          <button onClick={() => setConfirmDelete(p.id)} className="btn-eliminar">Eliminar</button>
-                        </div>
+                      {/* ← botón Editar restaurado, sin Eliminar */}
+                      <td style={{ width: 80 }}>
+                        <button onClick={() => abrirEditar(p)} className="btn-editar">Editar</button>
                       </td>
                     </tr>
                   );
