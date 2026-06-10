@@ -20,10 +20,8 @@ export default function GraficoVentasMensual({ ventas }) {
   useEffect(() => {
     if (!ventas || ventas.length === 0) return;
 
-    // ── 1. Estructuras para agrupar datos ──────────────────────────────
-    // agrupado = { "2026-05": { "Lácteos": 15000, "Bebidas": 4000 }, "2026-06": { ... } }
     const agrupado = {};
-    const categoriasSet = new Set(); // Para saber cuántas categorías únicas hay
+    const categoriasSet = new Set(); 
 
     ventas.forEach(v => {
       if (!v.fechaVenta || !v.detalles) return;
@@ -40,7 +38,6 @@ export default function GraficoVentasMensual({ ventas }) {
 
       // Recorrer los detalles para sumar por categoría
       v.detalles.forEach(detalle => {
-        // En tu backend la propiedad suele llamarse Nombre_Categoria o nombre
         const catName = detalle.producto?.categoria?.nombre_Categoria 
                      || detalle.producto?.categoria?.nombre 
                      || "Sin Categoría";
@@ -53,10 +50,8 @@ export default function GraficoVentasMensual({ ventas }) {
     });
 
     // ── 2. Preparar los Ejes y Datasets para Chart.js ──────────────────
-    // Ordenar los meses cronológicamente (Ej: ["2026-05", "2026-06"])
     const mesesOrdenados = Object.keys(agrupado).sort();
     
-    // Formatear los meses para que se vean bonitos (Opcional, ej: "Mayo 2026")
     const nombresMeses = mesesOrdenados.map(m => {
       const [year, month] = m.split("-");
       const date = new Date(year, month - 1);
@@ -89,14 +84,14 @@ export default function GraficoVentasMensual({ ventas }) {
     chartRef.current = new Chart(ctx, {
       type: "bar", // Gráfico de barras agrupadas
       data: {
-        labels: nombresMeses, // El eje X son los meses
-        datasets: datasets    // Las barras son las categorías
+        labels: nombresMeses, 
+        datasets: datasets   
       },
       options: {
         responsive: true,
         plugins: {
           legend: { 
-            display: true, // Mostrar la leyenda para saber qué color es cada categoría
+            display: true, 
             position: 'bottom',
             labels: { boxWidth: 12, font: { size: 11 } }
           },

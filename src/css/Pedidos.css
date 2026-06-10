@@ -65,14 +65,12 @@
   width: 100%;
 }
 
-.form-input-precio {
-  padding-left: 22px;
-}
+
 
 /* ── Cabecera de líneas ──────────────────────────────────────── */
 .lineas-header {
   display: grid;
-  grid-template-columns: 1fr 100px 130px 36px;
+  grid-template-columns: 1fr 100px 160px 36px;
   gap: 8px;
   margin-bottom: 6px;
 }
@@ -88,7 +86,7 @@
 /* ── Fila de línea ───────────────────────────────────────────── */
 .linea-row {
   display: grid;
-  grid-template-columns: 1fr 100px 130px 36px;
+  grid-template-columns: 1fr 100px 160px 36px;
   gap: 8px;
   margin-bottom: 8px;
   align-items: center;
@@ -206,3 +204,4 @@
   outline: none;
   width: 100%;
 }
+

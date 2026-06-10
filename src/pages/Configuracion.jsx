@@ -24,7 +24,7 @@ function Categorias() {
             : (data ?? []).map(c => (
                 <tr key={c.id}>
                   <td className="td-mono">{c.id}</td>
-                  <td style={{ fontWeight: 500 }}>{c.Nombre_Categoria}</td>
+                  <td style={{ fontWeight: 500 }}>{c.nombre_Categoria}</td>
                 </tr>
               ))
           }
@@ -65,8 +65,8 @@ function Proveedores() {
                       <div className="info-card-name">{pr.descripcion || "Proveedor " + pr.id}</div>
                       <div className="info-card-sub">RUT: {pr.rutEmpresa || "—"}</div>
                       <div className="info-card-meta">
-                        <span>✉️ {pr.email    || "—"}</span>
-                        <span>📞 {pr.telefono || "—"}</span>
+                        <span> {pr.email    || "—"}</span>
+                        <span> {pr.telefono || "—"}</span>
                       </div>
                     </div>
                   </div>
@@ -97,7 +97,7 @@ function Bodegas() {
                   <div style={{ flex: 1 }}>
                     <div className="info-card-name">{b.sucursal}</div>
                     <div className="info-card-sub" style={{ marginTop: 6 }}>
-                      📍 {b.direccion}
+                       {b.direccion}
                     </div>
                   </div>
                 </div>

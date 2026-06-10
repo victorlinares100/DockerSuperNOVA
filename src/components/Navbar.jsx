@@ -55,7 +55,7 @@ export default function Navbar({ pagina, setPagina }) {
             color: "#fff", fontFamily: "var(--font)",
             whiteSpace: "nowrap",
           }}>
-            🛒 Vista Cliente
+            Vista Cliente
           </button>
         </nav>
       </div>
