@@ -1,4 +1,4 @@
-import useFetch, { API } from "../hooks/useFetch";
+import useFetch, { API, CLIENTE_API } from "../hooks/useFetch";
 import { useState } from "react";
 import PageHeader from "../molecules/PageHeader";
 import StateMsg   from "../atoms/StateMsg";
@@ -27,20 +27,20 @@ export default function Solicitudes() {
   const fmtFecha = f => f ? new Date(f).toLocaleString("es-CL") : "—";
 
   async function cambiarEstado(sol, nuevoEstado) {
-    try {
-      const res = await fetch(`${API}/solicitudes/${sol.id}`, {
-        method:  "PUT",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ ...sol, estado: nuevoEstado }),
-      });
-      if (!res.ok) throw new Error();
-      setCambiando(null);
-      setExito(`Solicitud #${sol.id} actualizada.`);
-      setTimeout(() => setExito(""), 3000);
-      refetch();
-    } catch {
-      setCambiando(null);
-    }
+  try {
+    const res = await fetch(`${CLIENTE_API}/solicitudes/${sol.id}`, {  // ← CLIENTE_API en vez de API
+      method:  "PUT",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ ...sol, estado: nuevoEstado }),
+    });
+    if (!res.ok) throw new Error();
+    setCambiando(null);
+    setExito(`Solicitud #${sol.id} actualizada.`);
+    setTimeout(() => setExito(""), 3000);
+    refetch();
+  } catch {
+    setCambiando(null);
+  }
   }
 
   // Contadores
