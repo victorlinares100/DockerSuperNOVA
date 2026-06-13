@@ -18,7 +18,7 @@ export default function Inicio() {
     p => p.estado?.toUpperCase() === "PENDIENTE"
   ).length;
 
-  const ultimos = (productos ?? []).slice(0, 5);
+  const ultimos = (productos ?? []).slice(-5).reverse();
 
   return (
     <>

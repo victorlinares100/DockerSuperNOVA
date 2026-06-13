@@ -1,28 +1,37 @@
-import { useState }  from "react";
-import useFetch      from "../hooks/useFetch";
-import DataTable     from "../atoms/DataTable";
-import EmptyRow      from "../atoms/EmptyRow";
-import StateMsg      from "../atoms/StateMsg";
-import PageHeader    from "../molecules/PageHeader";
+import { useState } from "react";
+import useFetch, { API } from "../hooks/useFetch";
+import DataTable  from "../atoms/DataTable";
+import EmptyRow   from "../atoms/EmptyRow";
+import StateMsg   from "../atoms/StateMsg";
+import PageHeader from "../molecules/PageHeader";
 import "../css/Movimientos.css";
 
-const TIPOS = ["ENTRADA", "SALIDA", "VENTA", "AJUSTE"];
+const TIPOS = ["ENTRADA", "SALIDA", "VENTA"];
 
 const TIPO_STYLE = {
   ENTRADA: { cls: "badge badge-ok",   icono: "↑" },
   SALIDA:  { cls: "badge badge-warn", icono: "↓" },
   VENTA:   { cls: "badge badge-info", icono: "🛒" },
-  AJUSTE:  { cls: "badge",            icono: "⚙" },
 };
+
+const MOTIVOS = ["Vencido", "Dañado", "Robo", "Otro"];
 
 const HEADERS = ["#", "Tipo", "Producto", "Bodega", "Cantidad", "Fecha", "Descripción"];
 
 export default function Movimientos() {
-  const { data, loading, error } = useFetch("/movimientosStock");
-  const { data: bodegas }        = useFetch("/bodegas");
+  const { data, loading, error, refetch } = useFetch("/movimientosStock");
+  const { data: stocks }                  = useFetch("/stocks");
+  const { data: bodegas }                 = useFetch("/bodegas");
 
-  const [filtroTipo, setFiltroTipo] = useState("TODOS");
-  const [busqueda,   setBusqueda]   = useState("");
+  const [filtroTipo,  setFiltroTipo]  = useState("TODOS");
+  const [busqueda,    setBusqueda]    = useState("");
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [stockId,     setStockId]     = useState("");
+  const [cantidad,    setCantidad]    = useState("");
+  const [motivo,      setMotivo]      = useState(MOTIVOS[0]);
+  const [guardando,   setGuardando]   = useState(false);
+  const [errorForm,   setErrorForm]   = useState("");
+  const [exito,       setExito]       = useState("");
 
   const getBodegaName = (id) => {
     const b = (bodegas ?? []).find(x => String(x.id) === String(id));
@@ -32,12 +41,10 @@ export default function Movimientos() {
   const lista = (data ?? []).filter(m => {
     const matchTipo = filtroTipo === "TODOS" || m.tipoMovimiento === filtroTipo;
     const nombreBodega = getBodegaName(m.stock?.bodegaId);
-    
     const matchBusq = !busqueda ||
       m.stock?.producto?.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
       m.descripcion?.toLowerCase().includes(busqueda.toLowerCase()) ||
       nombreBodega.toLowerCase().includes(busqueda.toLowerCase());
-      
     return matchTipo && matchBusq;
   });
 
@@ -45,13 +52,93 @@ export default function Movimientos() {
     ENTRADA: (data ?? []).filter(m => m.tipoMovimiento === "ENTRADA").length,
     SALIDA:  (data ?? []).filter(m => m.tipoMovimiento === "SALIDA").length,
     VENTA:   (data ?? []).filter(m => m.tipoMovimiento === "VENTA").length,
-    AJUSTE:  (data ?? []).filter(m => m.tipoMovimiento === "AJUSTE").length,
   };
+
+  function cerrarForm() {
+    setMostrarForm(false); setStockId(""); setCantidad("");
+    setMotivo(MOTIVOS[0]); setErrorForm("");
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setErrorForm("");
+    if (!stockId)               { setErrorForm("Selecciona un producto/bodega."); return; }
+    if (!cantidad || Number(cantidad) < 1) { setErrorForm("Ingresa una cantidad válida."); return; }
+
+    setGuardando(true);
+    try {
+      const res = await fetch(
+        `${API}/stocks/${stockId}/salida?cantidad=${cantidad}&motivo=${encodeURIComponent(motivo)}`,
+        { method: "POST" }
+      );
+      if (!res.ok) throw new Error(await res.text() || `Error ${res.status}`);
+      cerrarForm();
+      setExito("Salida registrada correctamente.");
+      setTimeout(() => setExito(""), 3000);
+      refetch();
+    } catch (err) {
+      setErrorForm(err.message || "No se pudo registrar la salida.");
+    } finally {
+      setGuardando(false);
+    }
+  }
 
   return (
     <div className="page-wrapper">
-      <PageHeader title="Historial de movimientos" sub="Todas las entradas, salidas, ventas y ajustes de stock" />
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
+        <PageHeader title="Historial de movimientos" sub="Entradas, salidas y ventas de stock" />
+        <button onClick={() => setMostrarForm(true)} className="btn-primary">
+          + Registrar salida
+        </button>
+      </div>
 
+      {exito && <div className="msg-exito">✓ {exito}</div>}
+
+      {/* ── Formulario salida ── */}
+      {mostrarForm && (
+        <div className="card card-form">
+          <div className="card-title">
+            Registrar salida de stock
+            <button onClick={cerrarForm} className="btn-close">×</button>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid-2">
+              <div className="form-field">
+                <label className="form-label">Producto / Bodega <span style={{ color: "var(--danger)" }}>*</span></label>
+                <select value={stockId} onChange={e => setStockId(e.target.value)} className="form-input">
+                  <option value="">— Seleccionar —</option>
+                  {(stocks ?? []).map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.producto?.nombre} — {getBodegaName(s.bodegaId)} ({s.cantidadDisponible} disp.)
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-field">
+                <label className="form-label">Motivo <span style={{ color: "var(--danger)" }}>*</span></label>
+                <select value={motivo} onChange={e => setMotivo(e.target.value)} className="form-input">
+                  {MOTIVOS.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div className="form-field">
+                <label className="form-label">Cantidad <span style={{ color: "var(--danger)" }}>*</span></label>
+                <input type="number" min="1" value={cantidad}
+                  onChange={e => setCantidad(e.target.value)}
+                  className="form-input" placeholder="Ej: 5" autoFocus />
+              </div>
+            </div>
+            {errorForm && <p className="msg-error-form">⚠ {errorForm}</p>}
+            <div className="btn-row">
+              <button type="submit" disabled={guardando} className="btn-primary">
+                {guardando ? "Registrando…" : "Registrar salida"}
+              </button>
+              <button type="button" onClick={cerrarForm} className="btn-secondary">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* KPIs */}
       {!loading && (
         <div className="kpi-grid">
           <div className="kpi-card kpi-entradas">
@@ -69,29 +156,18 @@ export default function Movimientos() {
             <div className="kpi-value kpi-value-ventas">{kpis.VENTA}</div>
             <div className="kpi-sub">productos vendidos</div>
           </div>
-          <div className="kpi-card kpi-ajustes">
-            <div className="kpi-label">⚙ Ajustes</div>
-            <div className="kpi-value kpi-value-ajustes">{kpis.AJUSTE}</div>
-            <div className="kpi-sub">correcciones manuales</div>
-          </div>
         </div>
       )}
 
+      {/* Tabla */}
       <div className="card">
         <div className="toolbar">
-          <input
-            className="search"
-            placeholder="Buscar por producto o descripción…"
-            value={busqueda}
-            onChange={e => setBusqueda(e.target.value)}
-          />
+          <input className="search" placeholder="Buscar por producto o descripción…"
+            value={busqueda} onChange={e => setBusqueda(e.target.value)} />
           <div className="filtros-wrap">
             {["TODOS", ...TIPOS].map(t => (
-              <button
-                key={t}
-                onClick={() => setFiltroTipo(t)}
-                className={`filtro-btn${filtroTipo === t ? " activo" : ""}`}
-              >
+              <button key={t} onClick={() => setFiltroTipo(t)}
+                className={`filtro-btn${filtroTipo === t ? " activo" : ""}`}>
                 {t === "TODOS" ? "Todos" : t.charAt(0) + t.slice(1).toLowerCase()}
               </button>
             ))}
@@ -110,13 +186,13 @@ export default function Movimientos() {
                       : "Sin resultados para el filtro aplicado"
                   } />
                 : [...lista].reverse().map(m => {
-                    const tipo    = m.tipoMovimiento?.toUpperCase();
-                    const estilo  = TIPO_STYLE[tipo] ?? { cls: "badge", icono: "—" };
+                    const tipo   = m.tipoMovimiento?.toUpperCase();
+                    const estilo = TIPO_STYLE[tipo] ?? { cls: "badge", icono: "—" };
                     const clsCant = tipo === "ENTRADA" ? "cantidad-positivo"
                                   : tipo === "SALIDA" || tipo === "VENTA" ? "cantidad-negativo"
                                   : "cantidad-neutral";
-                    const prefijo = tipo === "ENTRADA" ? "+" : (tipo === "SALIDA" || tipo === "VENTA") ? "-" : "";
-
+                    const prefijo = tipo === "ENTRADA" ? "+"
+                                  : (tipo === "SALIDA" || tipo === "VENTA") ? "-" : "";
                     return (
                       <tr key={m.id}>
                         <td className="td-mono">#{m.id}</td>
