@@ -1,27 +1,61 @@
-Este proyecto es un sistema de gestión de inventario en tiempo real que utiliza una arquitectura de microservicios (actualmente en transición) con Spring Boot para el Backend, React para el Frontend y MariaDB como base de datos, todo orquestado con Docker.
+# SuperNOVA — Frontend
 
-1 . requisitos : Docker y Docker compose instalados 
+Sistema de gestión de inventario para supermercado, desarrollado en React y desplegado con Docker.
 
-2 . clonar el repositorio : https://github.com/victorlinares100/DockerSuperNOVA.git y realizar un cd a la carpeta 
+## Tecnologías utilizadas
 
-3 . **docker compose up -d ** 
-para levantar todos los servicios (desde la terminal del visual studio o el cmd )
+- React 
+- JavaScript 
+- CSS personalizado con variables
+- SheetJS (xlsx) — exportación a Excel
+- Recharts — gráficos y dashboards
+- Docker — despliegue en contenedor
 
-4 . **docker compose exec mi_base_de_datos mariadb -u root -proot -e "USE microservicio_productos; SHOW TABLES;" ** 
-Entra al contenedor de la base de datos (que ya está corriendo) y ejecuta una consulta SQL automática para mostrar la lista de tablas que se crearon con el archivo init.sql.
+## Puertos del sistema
+Frontend (React) : 8090 
+MS Inventario (Spring Boot) : 8081 
+MS Clientes (Spring Boot) : 8082 
+MariaDB Inventario : 3307 
+MariaDB Clientes : 3308 
 
-5 . direccion de acceso para ver la pagina web : http://localhost:8090/ 
-  API de Productos (Backend): http://localhost:8080/api/v1/productos
+## Estructura del proyecto
+src/
+pages/# Vistas principales (Inicio, Productos, Stock, etc.)
+components/# Gráficos y componentes reutilizables
+atoms/# Componentes básicos (DataTable, Badge, etc.)
+molecules/# Componentes compuestos (PageHeader, etc.)
+hooks/# useFetch — comunicación con los microservicios
+css/# Estilos por módulo
+public/# Archivos estáticos
 
-6 . para visualizar los datos cargados primero se debe ejecutar el BackendSuperNova, Link del github : https://github.com/victorlinares100/BackendSuperNova.git 
+## Requisitos previos
 
-7. Tecnologías Utilizadas
-Backend: Java 17, Spring Boot, Spring Data JPA.
+- Docker Desktop instalado y corriendo
+- Los microservicios ms-inventario y ms-cliente deben estar activos
 
-Frontend: React.js.
+## Levantar el proyecto
 
-Base de Datos: MariaDB.
+```bash
+docker compose up --build
+```
 
-Infraestructura: Docker & Docker Compose.
+## Bajar el proyecto
 
-<img width="1911" height="647" alt="image" src="https://github.com/user-attachments/assets/7e30e7d2-880d-4314-867e-9157e6876d79" />
+```bash
+docker compose down -v
+```
+
+## Acceder al sistema
+
+Una vez levantado, abrir en el navegador:http://localhost:8090/
+
+## Funcionalidades principales
+
+- Dashboard con KPIs y gráficos de ventas y stock
+- Gestión de productos con edición y búsqueda
+- Control de stock por bodega con alertas de stock bajo
+- Registro de ventas y movimientos (entradas, salidas)
+- Gestión de pedidos a proveedores
+- Exportación de datos a Excel
+- Vista cliente con formulario de solicitudes
+- Notificaciones en tiempo real de stock bajo
