@@ -10,7 +10,6 @@ import {
   Title
 } from "chart.js";
 
-// Registramos los componentes para un gráfico de barras
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend, Title);
 
 export default function GraficoVentasMensual({ ventas }) {
@@ -36,7 +35,6 @@ export default function GraficoVentasMensual({ ventas }) {
 
       if (!agrupado[mesAnio]) agrupado[mesAnio] = {};
 
-      // Recorrer los detalles para sumar por categoría
       v.detalles.forEach(detalle => {
         const catName = detalle.producto?.categoria?.nombre_Categoria 
                      || detalle.producto?.categoria?.nombre 
@@ -49,7 +47,6 @@ export default function GraficoVentasMensual({ ventas }) {
       });
     });
 
-    // ── 2. Preparar los Ejes y Datasets para Chart.js ──────────────────
     const mesesOrdenados = Object.keys(agrupado).sort();
     
     const nombresMeses = mesesOrdenados.map(m => {
@@ -60,29 +57,25 @@ export default function GraficoVentasMensual({ ventas }) {
 
     const categoriasArray = Array.from(categoriasSet);
 
-    // Paleta de colores para las diferentes categorías
     const colores = [
       "#2563eb", "#16a34a", "#d97706", "#dc2626", 
       "#7c3aed", "#0891b2", "#be185d", "#65a30d"
     ];
 
-    // Crear un dataset (grupo de barras) por cada categoría
     const datasets = categoriasArray.map((cat, index) => {
       return {
         label: cat,
-        // Buscar el valor de esta categoría en cada mes, si no hay, poner 0
         data: mesesOrdenados.map(mes => agrupado[mes][cat] || 0),
         backgroundColor: colores[index % colores.length],
         borderRadius: 4,
       };
     });
 
-    // ── 3. Renderizar el Gráfico ───────────────────────────────────────
     if (chartRef.current) chartRef.current.destroy();
 
     const ctx = canvasRef.current.getContext("2d");
     chartRef.current = new Chart(ctx, {
-      type: "bar", // Gráfico de barras agrupadas
+      type: "bar", 
       data: {
         labels: nombresMeses, 
         datasets: datasets   

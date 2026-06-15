@@ -50,7 +50,7 @@ export default function Inicio() {
           <div className="kpi-card">
             <div className="kpi-label">Bodegas</div>
             <div className="kpi-value">{bodegas ? bodegas.length : "…"}</div>
-            <div className="kpi-sub">sucursales activas</div>
+            <div className="kpi-sub">Bodegas Activas </div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Pedidos pendientes</div>
@@ -77,13 +77,11 @@ export default function Inicio() {
 
         </div>
 
-        {/* ─── FILA 2 DE GRÁFICOS (NUEVA) ─── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: 24 }}>
           <div className="card">
-            <GraficoTopProductos ventas={ventas} /> {/* ← Agregamos el Top 5 aquí */}
+            <GraficoTopProductos ventas={ventas} /> 
           </div>
           
-          {/* Lado Derecho: La Tabla de Últimos Productos (Antes estaba abajo sola) */}
           <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
               <div className="card-title" style={{ marginBottom: "12px" }}>Últimos productos registrados</div>

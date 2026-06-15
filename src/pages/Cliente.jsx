@@ -2,7 +2,7 @@ import { useState } from "react";
 import useFetch, { API } from "../hooks/useFetch";
 import "../css/Cliente.css";
 
-// ─── Helpers ──────────────────────────────────────────────────
+// ─── Helpers 
 const fmtPrecio = n => n != null ? `$${Number(n).toLocaleString("es-CL")}` : "—";
 
 const imagenPorCategoria = cat => {
@@ -31,12 +31,12 @@ const badgeStock = cantidad => {
   return               <span className="cli-badge cli-badge-ok">Disponible</span>;
 };
 
-// ─── Datos del equipo (estáticos) ─────────────────────────────
+// ─── Datos del equipo 
 const EQUIPO = [
   { nombre: "Victor Linares",  cargo: "Gerente General",      inicial: "CM", color: "#2563eb" },
 ];
 
-// ─── Formulario de contacto ───────────────────────────────────
+// ─── Formulario de contacto 
 const FORM_VACIO = { nombre: "", email: "", telefono: "", tipo: "CONSULTA", mensaje: "" };
 
 function FormularioContacto() {
@@ -117,7 +117,7 @@ function FormularioContacto() {
   );
 }
 
-// ─── Componente principal ─────────────────────────────────────
+// ─── Componente principal 
 export default function Cliente() {
   const { data: productos } = useFetch("/productos");
   const { data: stocks }    = useFetch("/stocks");
@@ -137,7 +137,6 @@ export default function Cliente() {
   return (
     <div className="cliente-wrap">
 
-      {/* ── Header ── */}
       <header className="cli-header">
         <div className="cli-logo">
           <div className="cli-logo-icon">🛒</div>

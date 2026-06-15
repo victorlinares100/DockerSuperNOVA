@@ -20,7 +20,6 @@ export default function GraficoVentas({ ventas }) {
   useEffect(() => {
     if (!ventas || ventas.length === 0) return;
 
-    // ── 1. Agrupar y sumar totales por día
     const porDia = {};
     
     ventas.forEach(v => {
@@ -38,11 +37,9 @@ export default function GraficoVentas({ ventas }) {
       porDia[fecha] = (porDia[fecha] ?? 0) + monto;
     });
 
-    // ── 2. Ordenar las fechas cronológicamente
     const fechasOrdenadas = Object.keys(porDia).sort();
     const valores = fechasOrdenadas.map(f => porDia[f]);
 
-    // ── 3. Construir / Destruir el Gráfico
     if (chartRef.current) {
       chartRef.current.destroy();
     }
@@ -78,7 +75,6 @@ export default function GraficoVentas({ ventas }) {
           },
           tooltip: {
             callbacks: {
-              // Formatear el dinero en el tooltip
               label: ctx => ` $${ctx.parsed.y.toLocaleString()}`,
             },
           },

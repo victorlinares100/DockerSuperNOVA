@@ -9,7 +9,6 @@ import {
   Title
 } from "chart.js";
 
-// Registramos los componentes necesarios
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Title);
 
 export default function GraficoTopProductos({ ventas }) {
@@ -19,7 +18,6 @@ export default function GraficoTopProductos({ ventas }) {
   useEffect(() => {
     if (!ventas || ventas.length === 0) return;
 
-    // ── 1. Contar cantidades por producto 
     const conteo = {};
 
     ventas.forEach(v => {
@@ -30,15 +28,13 @@ export default function GraficoTopProductos({ ventas }) {
       });
     });
 
-    // ── 2. Ordenar de mayor a menor y sacar el Top 5 
     const productosOrdenados = Object.entries(conteo)
-      .sort((a, b) => b[1] - a[1]) // Ordenar descendente por cantidad
-      .slice(0, 5);                // Tomar solo los primeros 5
+      .sort((a, b) => b[1] - a[1]) 
+      .slice(0, 5);                
 
     const labels = productosOrdenados.map(p => p[0]); 
     const data   = productosOrdenados.map(p => p[1]); 
 
-    // ── 3. Renderizar Gráfico Horizontal 
     if (chartRef.current) chartRef.current.destroy();
 
     const ctx = canvasRef.current.getContext("2d");

@@ -17,7 +17,6 @@ export default function Navbar({ pagina, setPagina }) {
   const { data: stocks } = useFetch("/stocks");
   const [mostrarAlertas, setMostrarAlertas] = useState(false);
 
-  // Productos con stock bajo
   const alertas = (stocks ?? []).filter(s =>
     (s.cantidadDisponible ?? 0) < (s.stockMinimo ?? 10)
   );
@@ -58,7 +57,6 @@ export default function Navbar({ pagina, setPagina }) {
             </button>
           ))}
 
-          {/* ── Campana de notificaciones ── */}
           <div style={{ position: "relative", marginLeft: 8 }}>
             <button
             onClick={() => setMostrarAlertas(v => !v)}
@@ -91,7 +89,6 @@ export default function Navbar({ pagina, setPagina }) {
               )}
             </button>
 
-            {/* Dropdown de alertas */}
             {mostrarAlertas && (
               <div style={{
                 position: "absolute", top: 44, right: 0,

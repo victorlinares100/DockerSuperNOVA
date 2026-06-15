@@ -20,7 +20,7 @@ export default function GraficoStock({ stocks }) {
   useEffect(() => {
     if (!stocks || stocks.length === 0) return;
 
-    // ── Agrupar stock por categoría ──────────────────────────────
+    // ── Agrupar stock por categoría 
     const porCategoria = {};
     stocks.forEach(s => {
       const cat  = s.producto?.categoria?.nombre_Categoria ?? "Sin categoría";

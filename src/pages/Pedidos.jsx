@@ -62,7 +62,7 @@ export default function Pedidos() {
     acc + (Number(l.cantidad) || 0) * (Number(l.precioUnitario) || 0), 0
   );
 
-  // ─── Crear pedido ─────────────────────────────────────────────
+  // ─── Crear pedido
   async function handleSubmit(e) {
     e.preventDefault();
     setErrorForm("");
@@ -109,7 +109,7 @@ export default function Pedidos() {
     }
   }
 
-  // ─── Cambiar estado de pedido existente ───────────────────────
+  // ─── Cambiar estado de pedido existente 
   async function handleCambiarEstado(pedido, nuevoEstado) {
     try {
       const res = await fetch(`${API}/pedidos/${pedido.id}`, {

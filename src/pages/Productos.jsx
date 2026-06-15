@@ -7,7 +7,6 @@ import PageHeader from "../molecules/PageHeader";
 import * as XLSX from "xlsx"; // ← 1. Importación de XLSX añadida
 import "../css/Productos.css"; 
 
-// ← 2. Función auxiliar de exportación añadida
 function exportarExcel(datos, nombreArchivo) {
   if (!datos || datos.length === 0) {
     alert("No hay datos para exportar");
@@ -123,18 +122,17 @@ export default function Productos() {
   return (
     <div className="page-wrapper">
 
-      {/* ── Header con botón de Excel integrado ── */}
+      {/* n botón de Excel  */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
         <PageHeader title="Productos" sub="Catálogo completo — stock en tiempo real" />
         
         <div style={{ display: "flex", gap: "10px" }}>
-          {/* Botón Exportar Excel añadido */}
+          {/* Botón Exportar Excel  */}
           <button
             onClick={() => {
               const datos = lista.map(p => {
                 const stock = stockDeProducto(p.id);
                 
-                // Calculamos dinámicamente el texto de estado para el Excel
                 let estadoTexto = "Sin stock";
                 if (stock !== null) {
                   if (stock.total <= 0) estadoTexto = "Agotado";
