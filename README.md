@@ -21,17 +21,17 @@ MariaDB Clientes : 3308
 ## Estructura del proyecto
 src/
 
-├── pages/          # Vistas principales (Inicio, Productos, Stock, etc.)
+- pages/          # Vistas principales (Inicio, Productos, Stock, etc.)
 
-├── components/     # Gráficos y componentes reutilizables
+- components/     # Gráficos y componentes reutilizables
 
-├── atoms/          # Componentes básicos (DataTable, Badge, etc.)
+-  atoms/          # Componentes básicos (DataTable, Badge, etc.)
 
-├── molecules/      # Componentes compuestos (PageHeader, etc.)
+-  molecules/      # Componentes compuestos (PageHeader, etc.)
 
-├── hooks/          # useFetch — comunicación con los microservicios
+-  hooks/          # useFetch — comunicación con los microservicios
 
-├── css/            # Estilos por módulo
+-  css/            # Estilos por módulo
 
 public/             # Archivos estáticos
 
