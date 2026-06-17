@@ -1,7 +1,6 @@
 import useFetch from "../hooks/useFetch";
 import { useState } from "react";
 
-
 const LINKS = [
   { id: "inicio",        label: "Inicio" },
   { id: "productos",     label: "Productos" },
@@ -13,7 +12,7 @@ const LINKS = [
   { id: "configuracion", label: "Configuración" },
 ];
 
-export default function Navbar({ pagina, setPagina }) {
+export default function Navbar({ pagina, setPagina, onIrCliente }) {
   const { data: stocks } = useFetch("/stocks");
   const [mostrarAlertas, setMostrarAlertas] = useState(false);
 
@@ -52,29 +51,30 @@ export default function Navbar({ pagina, setPagina }) {
               fontFamily: "var(--font)", transition: "background .15s, color .15s",
             }}
             onMouseEnter={e => { if (pagina !== l.id) e.target.style.color = "#ffffff"; }}
-            onMouseLeave={e => { if (pagina !== l.id) e.target.style.color = "rgba(255, 255, 255, 0.7)"; }}>
+            onMouseLeave={e => { if (pagina !== l.id) e.target.style.color = "rgba(255,255,255,0.70)"; }}>
               {l.label}
             </button>
           ))}
 
+          {/* Campana */}
           <div style={{ position: "relative", marginLeft: 8 }}>
             <button
-            onClick={() => setMostrarAlertas(v => !v)}
-            title="Alertas de stock bajo"
-            style={{
-              background: "var(--navy)",
-              border: "1px solid rgba(255,255,255,.20)",
-              cursor: "pointer",
-              width: 36, height: 36, borderRadius: "var(--radius)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              position: "relative", transition: "background .15s",
-              color: "#ffffff",
-            }}
+              onClick={() => setMostrarAlertas(v => !v)}
+              title="Alertas de stock bajo"
+              style={{
+                background: "var(--navy)",
+                border: "1px solid rgba(255,255,255,.20)",
+                cursor: "pointer",
+                width: 36, height: 36, borderRadius: "var(--radius)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                position: "relative", transition: "background .15s",
+                color: "#ffffff",
+              }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
               {alertas.length > 0 && (
                 <span style={{
                   position: "absolute", top: -5, right: -5,
@@ -163,7 +163,7 @@ export default function Navbar({ pagina, setPagina }) {
             )}
           </div>
 
-          <button onClick={() => setPagina("cliente")} style={{
+          <button onClick={onIrCliente} style={{
             marginLeft: 8, background: "#2563eb",
             border: "none", cursor: "pointer",
             padding: "7px 14px", borderRadius: "var(--radius)",
