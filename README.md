@@ -56,6 +56,11 @@ docker compose down -v
 
 Una vez levantado, abrir en el navegador:http://localhost:8090/
 
+## Credenciales de acceso al Admin 
+
+- Usuario : admin 
+- Contraseña : supernova2026
+
 ## Funcionalidades principales
 
 - Dashboard con KPIs y gráficos de ventas y stock
